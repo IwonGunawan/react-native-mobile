@@ -1,12 +1,13 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { useAuthStore } from "../../stores/auth.store";
+import { Text } from "react-native-paper";
 
 export default function WaterUsageScreen() {
   const { user } = useAuthStore();
 
   return (
     <View style={styles.container}>
-      <Text>Water Usage Page</Text>
+      <Text variant="headlineSmall">Water Usage Page</Text>
     </View>
   );
 }

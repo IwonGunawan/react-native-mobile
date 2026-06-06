@@ -1,12 +1,13 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { useAuthStore } from "../../stores/auth.store";
+import { Text } from "react-native-paper";
 
 export default function ProfileScreen() {
   const { user } = useAuthStore();
 
   return (
     <View style={styles.container}>
-      <Text>Profile Page</Text>
+      <Text variant="headlineSmall">Profile Page</Text>
     </View>
   );
 }
