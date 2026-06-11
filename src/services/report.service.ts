@@ -50,6 +50,13 @@ export interface WaterUsageTotal {
   totalMeterUsage: number;
 }
 
+export interface TopArrear {
+  customerId: number;
+  name: string;
+  code: string;
+  arrearsAmount: number;
+}
+
 export const reportService = {
   getMonthly: (params: ReportQuery) =>
     api.get<ReportResponse<MonthlyReportItem>>('/reports/monthly', { params })
@@ -61,4 +68,7 @@ export const reportService = {
 
   getWaterUsageTotal: () =>
     api.get<WaterUsageTotal>('/reports/water-usage-total').then(r => r.data),
+
+  getTopArrears: () =>
+    api.get<TopArrear[]>('/reports/top-arrears').then(r => r.data),
 };

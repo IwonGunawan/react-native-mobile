@@ -1,6 +1,5 @@
 import {
   FlatList,
-  Pressable,
   RefreshControl,
   StyleSheet,
   TouchableOpacity,
@@ -13,37 +12,25 @@ import { HomeStackParams } from "../../navigation/stacks/HomeStack";
 import { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import useHomeData from "../../hooks/useHomeData";
-import { DAYS, MONTHS } from "../../utils";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { colors } from "../../theme";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import VillageProgressModal from "../../components/shared/VillageProgressModal";
+import { TopArrear } from "../../services/report.service";
+import { formatRupiah } from "../../utils";
 
 type Nav = NativeStackNavigationProp<HomeStackParams, "HomeMain">;
 
-function useClock() {
-  const [now, setNow] = useState(new Date());
-  useState(() => {
-    const id = setInterval(() => setNow(new Date()), 1000);
-    return () => clearInterval(id);
-  });
-
-  return now;
-}
-
 export default function HomeScreen() {
   const navigation = useNavigation<Nav>();
-  const now = useClock();
   const { user } = useAuthStore();
   const { data, isLoading, isRefresh, refetch } = useHomeData();
   const [modalVisible, setModalVisible] = useState(false);
+  const [showAllArrears, setShowAllArrears] = useState(false);
 
-  const dateStr = `${DAYS[now.getDay()]}, ${now.getDate()} ${MONTHS[now.getMonth()]} ${now.getFullYear()}`;
-  const timeStr = now.toLocaleTimeString("id-ID", {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  });
+  const allArrears = (data?.topArrears ?? []) as TopArrear[];
+  const visibleArrears = showAllArrears ? allArrears : allArrears.slice(0, 5);
+  const arrearsHasMore = allArrears.length > 5;
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -62,37 +49,17 @@ export default function HomeScreen() {
           <View>
             {/* ── Greeting ── */}
             <View style={styles.greeting}>
-              <View>
-                <Text variant="bodyLarge" style={styles.greetText}>
-                  Selamat bekerja,
-                </Text>
-                <Text variant="headlineMedium" style={styles.nameText}>
-                  {user?.name}
-                </Text>
-              </View>
+              <Text variant="bodyLarge" style={styles.greetText}>
+                Selamat bekerja,
+              </Text>
+              <Text variant="headlineMedium" style={styles.nameText}>
+                {user?.name}
+              </Text>
             </View>
-
-            {/* ── Clock Card ── */}
-            <Card style={styles.clockCard}>
-              <Card.Content style={styles.clockContent}>
-                <View>
-                  <Text style={styles.dateText}>{dateStr}</Text>
-                  <Text style={styles.timeText}>{timeStr}</Text>
-                </View>
-                <MaterialCommunityIcons
-                  name="water"
-                  size={72}
-                  color="rgba(255,255,255,0.2)"
-                />
-              </Card.Content>
-            </Card>
 
             {/* ── Payment Status Cards ── */}
             <View style={styles.statsRow}>
-              <Surface
-                style={[styles.statCard, styles.statCardLeft]}
-                elevation={1}
-              >
+              <Surface style={styles.statCard} elevation={1}>
                 <MaterialCommunityIcons
                   name="check-circle-outline"
                   size={28}
@@ -106,10 +73,7 @@ export default function HomeScreen() {
                 </Text>
               </Surface>
 
-              <Surface
-                style={[styles.statCard, styles.statCardRight]}
-                elevation={1}
-              >
+              <Surface style={styles.statCard} elevation={1}>
                 <MaterialCommunityIcons
                   name="clock-outline"
                   size={28}
@@ -127,7 +91,33 @@ export default function HomeScreen() {
               </Surface>
             </View>
 
-            {/* ── Check Progress Card ── */}
+            {/* ── Total Pemakaian Air ── */}
+            <Card style={styles.m3Card}>
+              <Card.Content style={styles.m3Content}>
+                <View style={styles.m3Left}>
+                  <MaterialCommunityIcons
+                    name="gauge"
+                    size={32}
+                    color={colors.primary}
+                  />
+                  <View>
+                    <Text variant="titleSmall" style={styles.m3Title}>
+                      Total Pemakaian Air
+                    </Text>
+                    <Text variant="bodySmall" style={styles.m3Sub}>
+                      Bulan ini (semua wilayah)
+                    </Text>
+                  </View>
+                </View>
+                <Text variant="headlineSmall" style={styles.m3Value}>
+                  {isLoading
+                    ? "-"
+                    : `${(data?.totalM3 ?? 0).toLocaleString("id-ID")} m³`}
+                </Text>
+              </Card.Content>
+            </Card>
+
+            {/* ── Progress Cek Air ── */}
             <TouchableOpacity
               onPress={() => !isLoading && setModalVisible(true)}
               activeOpacity={0.8}
@@ -176,34 +166,73 @@ export default function HomeScreen() {
               </Card>
             </TouchableOpacity>
 
-            {/* ── Total m³ Card (placeholder) ── */}
-            <Card style={styles.m3Card}>
-              <Card.Content style={styles.m3Content}>
-                <View style={styles.m3Left}>
-                  <MaterialCommunityIcons
-                    name="gauge"
-                    size={32}
-                    color={colors.primary}
-                  />
-                  <View>
-                    <Text variant="titleSmall" style={styles.m3Title}>
-                      Total Pemakaian Air
-                    </Text>
-                    <Text variant="bodySmall" style={styles.m3Sub}>
-                      Bulan ini (semua wilayah)
-                    </Text>
-                  </View>
-                </View>
-                <View style={styles.m3Right}>
-                  <Text variant="headlineSmall" style={styles.m3Value}>
-                    {isLoading ? "-" : `${(data?.totalM3 ?? 0).toLocaleString("id-ID")} m³`}
+            {/* ── Top Tunggakan ── */}
+            <View style={styles.sectionRow}>
+              <Text variant="titleSmall" style={styles.sectionTitle}>
+                Top Tunggakan
+              </Text>
+            </View>
+
+            <Card style={styles.arrearsCard}>
+              {isLoading ? (
+                <View style={styles.arrearItem}>
+                  <Text variant="bodySmall" style={styles.loadingText}>
+                    Memuat...
                   </Text>
                 </View>
-              </Card.Content>
+              ) : (data?.topArrears ?? []).length === 0 ? (
+                <View style={styles.arrearItem}>
+                  <Text variant="bodySmall" style={styles.loadingText}>
+                    Tidak ada tunggakan
+                  </Text>
+                </View>
+              ) : (
+                <View>
+                  {visibleArrears.map((item, index) => (
+                    <View key={item.customerId}>
+                      <View style={styles.arrearItem}>
+                        <View style={styles.arrearRank}>
+                          <Text style={styles.arrearRankText}>{index + 1}</Text>
+                        </View>
+                        <View style={styles.arrearInfo}>
+                          <Text variant="bodyMedium" style={styles.arrearName}>
+                            {item.name}
+                          </Text>
+                          <Text variant="bodySmall" style={styles.arrearCode}>
+                            {item.code}
+                          </Text>
+                        </View>
+                        <Text variant="bodyMedium" style={styles.arrearAmount}>
+                          {formatRupiah(item.arrearsAmount)}
+                        </Text>
+                      </View>
+                      {(index < visibleArrears.length - 1 ||
+                        arrearsHasMore) && <Divider />}
+                    </View>
+                  ))}
+                  {arrearsHasMore && (
+                    <TouchableOpacity
+                      style={styles.arrearsSeeMoreBtn}
+                      onPress={() => setShowAllArrears((v) => !v)}
+                    >
+                      <Text style={styles.seeAllText}>
+                        {showAllArrears
+                          ? "Sembunyikan"
+                          : "Lihat semua tunggakan"}
+                      </Text>
+                      <MaterialCommunityIcons
+                        name={showAllArrears ? "chevron-up" : "arrow-right"}
+                        size={16}
+                        color={colors.primary}
+                      />
+                    </TouchableOpacity>
+                  )}
+                </View>
+              )}
             </Card>
 
-            {/* ── Recent Transactions Header ── */}
-            <View style={styles.sectionRow}>
+            {/* ── Transaksi Terakhir ── */}
+            <View style={[styles.sectionRow, { marginTop: 16 }]}>
               <Text variant="titleSmall" style={styles.sectionTitle}>
                 Transaksi Terakhir
               </Text>
@@ -295,7 +324,6 @@ export default function HomeScreen() {
         contentContainerStyle={styles.list}
       />
 
-      {/* Village Progress Modal */}
       <VillageProgressModal
         visible={modalVisible}
         stats={data?.villageStats ?? []}
@@ -313,34 +341,12 @@ const styles = StyleSheet.create({
   greeting: {
     paddingHorizontal: 20,
     paddingTop: 20,
-    paddingBottom: 12,
+    paddingBottom: 16,
   },
   greetText: { color: colors.textSecondary },
   nameText: { color: colors.primary, fontWeight: "700" },
 
-  // Clock
-  clockCard: {
-    marginHorizontal: 16,
-    marginBottom: 16,
-    backgroundColor: colors.primary,
-    borderRadius: 16,
-    elevation: 4,
-  },
-  clockContent: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 20,
-  },
-  dateText: { color: "rgba(255,255,255,0.85)", fontSize: 13, marginBottom: 4 },
-  timeText: {
-    color: "#fff",
-    fontSize: 40,
-    fontWeight: "700",
-    letterSpacing: 1,
-  },
-
-  // Stats
+  // Payment stats
   statsRow: {
     flexDirection: "row",
     marginHorizontal: 16,
@@ -355,10 +361,25 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 6,
   },
-  statCardLeft: {},
-  statCardRight: {},
   statNumber: { fontWeight: "700", color: colors.textPrimary },
   statLabel: { color: colors.textSecondary, textAlign: "center" },
+
+  // m³ Card
+  m3Card: {
+    marginHorizontal: 16,
+    marginBottom: 12,
+    borderRadius: 12,
+    elevation: 2,
+  },
+  m3Content: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  m3Left: { flexDirection: "row", alignItems: "center", gap: 12, flex: 1 },
+  m3Title: { fontWeight: "600", color: colors.textPrimary },
+  m3Sub: { color: colors.textSecondary, marginTop: 2 },
+  m3Value: { fontWeight: "700", color: colors.textPrimary },
 
   // Progress
   progressCard: {
@@ -392,26 +413,7 @@ const styles = StyleSheet.create({
   },
   progressHint: { color: colors.textSecondary },
 
-  // m³ Card
-  m3Card: {
-    marginHorizontal: 16,
-    marginBottom: 16,
-    borderRadius: 12,
-    elevation: 2,
-  },
-  m3Content: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  m3Left: { flexDirection: "row", alignItems: "center", gap: 12, flex: 1 },
-  m3Title: { fontWeight: "600", color: colors.textPrimary },
-  m3Sub: { color: colors.textSecondary, marginTop: 2 },
-  m3Right: { alignItems: "flex-end" },
-  m3Value: { fontWeight: "700", color: colors.textPrimary },
-  m3Pending: { color: colors.textSecondary, fontSize: 11 },
-
-  // Section
+  // Section header
   sectionRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -420,20 +422,51 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   sectionTitle: { fontWeight: "600", color: colors.textPrimary },
-  seeMore: {
+  seeMore: { flexDirection: "row", alignItems: "center", gap: 4 },
+  seeMoreText: { color: colors.primary, fontSize: 13, fontWeight: "600" },
+
+  // Top Tunggakan
+  arrearsCard: {
+    marginHorizontal: 16,
+    marginBottom: 8,
+    borderRadius: 12,
+    elevation: 2,
+  },
+  arrearItem: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 4,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    gap: 12,
   },
-  seeMoreText: { color: colors.primary, fontSize: 13, fontWeight: "600" },
+  arrearRank: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: colors.primaryLight + "20",
+    justifyContent: "center",
+    alignItems: "center",
+    flexShrink: 0,
+  },
+  arrearRankText: { color: colors.primary, fontWeight: "700", fontSize: 12 },
+  arrearInfo: { flex: 1 },
+  arrearName: { fontWeight: "600", color: colors.textPrimary },
+  arrearCode: { color: colors.textSecondary, marginTop: 1 },
+  arrearAmount: { color: colors.danger, fontWeight: "700", flexShrink: 0 },
+  arrearsSeeMoreBtn: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 12,
+    gap: 6,
+    borderBottomLeftRadius: 12,
+    borderBottomRightRadius: 12,
+  },
+  loadingText: { color: colors.textSecondary },
 
   // Empty
   emptyCard: { marginHorizontal: 16, borderRadius: 12 },
-  emptyContent: {
-    alignItems: "center",
-    paddingVertical: 32,
-    gap: 12,
-  },
+  emptyContent: { alignItems: "center", paddingVertical: 32, gap: 12 },
   emptyText: { color: colors.textSecondary },
 
   // Transaction
@@ -446,11 +479,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 12,
     borderTopRightRadius: 12,
   },
-  txContent: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 12,
-  },
+  txContent: { flexDirection: "row", alignItems: "flex-start", gap: 12 },
   avatar: {
     width: 40,
     height: 40,
@@ -472,7 +501,6 @@ const styles = StyleSheet.create({
   // See All
   seeAllBtn: {
     marginHorizontal: 16,
-    marginTop: 2,
     backgroundColor: "#fff",
     borderBottomLeftRadius: 12,
     borderBottomRightRadius: 12,
@@ -481,7 +509,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingVertical: 14,
     gap: 6,
-    elevation: 1,
   },
   seeAllText: { color: colors.primary, fontWeight: "600", fontSize: 14 },
 });
