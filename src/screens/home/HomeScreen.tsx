@@ -49,7 +49,7 @@ export default function HomeScreen() {
     <SafeAreaView style={styles.safe}>
       <FlatList
         data={data?.recentPayments ?? []}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item.paymentId.toString()}
         showsVerticalScrollIndicator={false}
         refreshControl={
           <RefreshControl
@@ -140,7 +140,9 @@ export default function HomeScreen() {
                         Progress Cek Air Bulan Ini
                       </Text>
                       <Text variant="bodySmall" style={styles.progressSub}>
-                        {isLoading ? "Memuat..." : `25 customer belum dicek`}
+                        {isLoading
+                          ? "Memuat..."
+                          : `${(data?.totalCustomers ?? 0) - (data?.totalChecked ?? 0)} customer belum dicek`}
                       </Text>
                     </View>
                     <View style={styles.percentBadge}>
@@ -194,7 +196,7 @@ export default function HomeScreen() {
                 </View>
                 <View style={styles.m3Right}>
                   <Text variant="headlineSmall" style={styles.m3Value}>
-                    1.000 m³
+                    {isLoading ? "-" : `${(data?.totalM3 ?? 0).toLocaleString("id-ID")} m³`}
                   </Text>
                 </View>
               </Card.Content>
@@ -240,13 +242,13 @@ export default function HomeScreen() {
             <Card.Content style={styles.txContent}>
               <View style={styles.avatar}>
                 <Text style={styles.avatarText}>
-                  {item.customer_name?.charAt(0).toUpperCase()}
+                  {item.customerName?.charAt(0).toUpperCase()}
                 </Text>
               </View>
 
               <View style={styles.txInfo}>
                 <Text variant="bodyMedium" style={styles.txName}>
-                  {item.prefix} {item.customer_name}
+                  {item.prefix} {item.customerName}
                 </Text>
                 <Text variant="bodySmall" style={styles.txVillage}>
                   {item.village}
@@ -259,13 +261,13 @@ export default function HomeScreen() {
 
               <View style={styles.txMeta}>
                 <Text variant="bodySmall" style={styles.txDate}>
-                  {new Date(item.paid_date).toLocaleDateString("id-ID", {
+                  {new Date(item.paidDate).toLocaleDateString("id-ID", {
                     day: "2-digit",
                     month: "short",
                   })}
                 </Text>
                 <Text variant="bodySmall" style={styles.txTime}>
-                  {new Date(item.paid_date).toLocaleTimeString("id-ID", {
+                  {new Date(item.paidDate).toLocaleTimeString("id-ID", {
                     hour: "2-digit",
                     minute: "2-digit",
                   })}

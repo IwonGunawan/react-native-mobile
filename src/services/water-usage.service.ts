@@ -46,7 +46,25 @@ export const waterUsageService = {
   create: (payload: { customerId: number; meterNumber: number }) =>
     api.post('/water-usage', payload).then(r => r.data),
 
-  getCheckSummary: (villageId?: number) =>
-    api.get<any>('/water-usage', {params: { village_id: villageId, limit: 500}})
-  .then((r) => r.data), // [TODO] create new endpoind for counting total checked
+  getProgress: () =>
+    api.get<WaterUsageProgress>('/water-usage/progress').then(r => r.data),
 };
+
+export interface VillageProgress {
+  villageId: number;
+  villageName: string;
+  totalCustomers: number;
+  checkedCount: number;
+  percent: number;
+}
+
+export interface WaterUsageProgress {
+  month: number;
+  year: number;
+  overall: {
+    totalCustomers: number;
+    checkedCount: number;
+    percent: number;
+  };
+  villages: VillageProgress[];
+}

@@ -1,5 +1,5 @@
 import { Modal, ScrollView, StyleSheet, View } from "react-native";
-import { VillageStat } from "../../hooks/useHomeData";
+import type { VillageStat } from "../../hooks/useHomeData";
 import { colors } from "../../theme";
 import { Button, ProgressBar, Text } from "react-native-paper";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
@@ -15,8 +15,8 @@ export default function VillageProgressModal({
   stats,
   onClose,
 }: Props) {
-  const totalAll = stats.reduce((s, v) => s + v.total, 0);
-  const checkedAll = stats.reduce((s, v) => s + v.checked, 0);
+  const totalAll = stats.reduce((s, v) => s + v.totalCustomers, 0);
+  const checkedAll = stats.reduce((s, v) => s + v.checkedCount, 0);
 
   return (
     <Modal
@@ -38,7 +38,7 @@ export default function VillageProgressModal({
 
           <ScrollView showsVerticalScrollIndicator={false}>
             {stats.map((s) => (
-              <View key={s.village.id} style={styles.villageItem}>
+              <View key={s.villageId} style={styles.villageItem}>
                 {/* header */}
                 <View style={styles.villageHeader}>
                   <View style={styles.villageLeft}>
@@ -48,19 +48,19 @@ export default function VillageProgressModal({
                       color={colors.primary}
                     />
                     <Text variant="bodyMedium" style={styles.villageName}>
-                      {s.village.name}
+                      {s.villageName}
                     </Text>
                   </View>
                   <Text variant="bodySmall" style={styles.villageCount}>
-                    {s.checked / s.total}
+                    {s.checkedCount}/{s.totalCustomers}
                   </Text>
                 </View>
 
                 {/* Progress Bar */}
                 <ProgressBar
-                  progress={s.total > 0 ? s.checked / s.total : 0}
+                  progress={s.totalCustomers > 0 ? s.checkedCount / s.totalCustomers : 0}
                   color={
-                    s.percent == 100
+                    s.percent === 100
                       ? colors.success
                       : s.percent >= 50
                         ? colors.primary
@@ -74,7 +74,7 @@ export default function VillageProgressModal({
                   <Text variant="bodySmall" style={styles.percentText}>
                     {s.percent}%
                   </Text>
-                  {s.percent == 100 && (
+                  {s.percent === 100 && (
                     <View style={styles.doneBadge}>
                       <MaterialCommunityIcons
                         name="check-circle"

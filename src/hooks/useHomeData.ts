@@ -1,26 +1,26 @@
 import { useCallback, useEffect, useState } from "react";
-import { Village } from "../types";
 import { paymentService, RecentPayment } from "../services/payment.service";
-import { villageService } from "../services/village.service";
 import { dashboardService } from "../services/dashboard.service";
 import { waterUsageService } from "../services/water-usage.service";
+import { reportService } from "../services/report.service";
 
 export interface VillageStat {
-  village: Village,
-  total: number,
-  checked: number,
-  percent: number
+  villageId: number;
+  villageName: string;
+  totalCustomers: number;
+  checkedCount: number;
+  percent: number;
 }
 
 export interface HomeData {
-  recentPayments: RecentPayment[],
-  totalChecked: number,
-  totalCustomer: number,
-  checkPercent: number,
-  villageStats: VillageStat[],
-  paidCount: number,
-  unpaidCount: number,
-  totalM3: number,
+  recentPayments: RecentPayment[];
+  totalChecked: number;
+  totalCustomers: number;
+  checkPercent: number;
+  villageStats: VillageStat[];
+  paidCount: number;
+  unpaidCount: number;
+  totalM3: number;
 }
 
 export default function useHomeData() {
@@ -33,30 +33,24 @@ export default function useHomeData() {
     isRefresh ? setIsRefresh(true) : setIsLoading(true);
     setError(null);
 
-    // running all request paralel
     try {
-      const [recents, villages, summaries, allUsages] = await Promise.all([
+      const [recents, summaries, progress, waterTotal] = await Promise.all([
         paymentService.getRecent(),
-        villageService.getAll(),
         dashboardService.getSummary(),
-        waterUsageService.getCheckSummary()
-      ])
-
-      // counting total checked
-      const totalChecked = 10;
-      const totalCustomers = 100;
-      const checkPercent = Math.round((totalCustomers/totalChecked) * 100)
+        waterUsageService.getProgress(),
+        reportService.getWaterUsageTotal(),
+      ]);
 
       setData({
         recentPayments: recents,
-        totalChecked,
-        totalCustomers,
-        checkPercent,
-        villageStats: [],
+        totalChecked: progress.overall.checkedCount,
+        totalCustomers: progress.overall.totalCustomers,
+        checkPercent: progress.overall.percent,
+        villageStats: progress.villages,
         paidCount: summaries.paidCount,
-        unpaidCount:  summaries.unpaidCount,
-        totalMeter: 1234,
-      })
+        unpaidCount: summaries.unpaidCount,
+        totalM3: waterTotal.totalMeterUsage,
+      });
     } catch (error) {
       setError('failed load data')
     } finally{

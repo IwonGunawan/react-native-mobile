@@ -3,14 +3,14 @@ import api from "./api"
 import { WaterUsageQuery } from "./water-usage.service";
 
 export interface RecentPayment {
-  id:         number,
-  total:      number, 
-  cash:       number,
-  createdAt:  string,
-  customerName:   string,
-  prefix:     string,
-  village:    string,
-  officer:    string
+  paymentId:    number;
+  total:        number;
+  cash:         number;
+  paidDate:     string;
+  customerName: string;
+  prefix:       string;
+  village:      string;
+  officer:      string;
 }
 
 export interface Payment {
@@ -49,15 +49,15 @@ interface waterUsage {
 export const paymentService = {
   // get recent payment limit 5
   getRecent: () => {
-    return api.get<{data: RecentPayment[]}>('/reports/monthly', {
+    return api.get<{ data: RecentPayment[] }>('/reports/monthly', {
       params: {
-        month: new Date().getMonth(),
+        month: new Date().getMonth() + 1,
         year: new Date().getFullYear(),
         page: 1,
         limit: 5,
-        sortOrder: 'DESC' 
-      }
-    }).then(r => r.data);
+        sortOrder: 'DESC',
+      },
+    }).then(r => r.data.data);
   },
 
   getAll: (params?: WaterUsageQuery) => {
