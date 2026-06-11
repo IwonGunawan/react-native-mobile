@@ -22,7 +22,7 @@ export const logger = {
   },
   debug: (msg: string, data?: any) => {
     if (__DEV__) {
-      console.log(`🐛 [DEBUG] ${msg}`, data);
+      console.log(`[DEBUG] ${msg}`, data);
     }
   },
 };

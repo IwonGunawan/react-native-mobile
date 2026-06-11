@@ -2,11 +2,12 @@ import axios from 'axios'
 import { useAuthStore } from '../stores/auth.store'
 import { logger } from '../utils/debug'
 
-// 10.0.2.2 = alias ke localhost laptop dari emulator Android
 const api = axios.create({
-  baseURL:    __DEV__ ? 'http://10.0.2.2:3100' : 'https://cikaret-api.up.railway.app',
-  headers:    { 'Content-Type': 'application/json'},
-  timeout:    10000 // 10s
+  baseURL: __DEV__
+    ? process.env.EXPO_PUBLIC_API_URL_DEV
+    : process.env.EXPO_PUBLIC_API_URL,
+  headers: { 'Content-Type': 'application/json' },
+  timeout: 10000,
 })
 
 api.interceptors.request.use((config) => {
