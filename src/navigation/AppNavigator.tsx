@@ -6,6 +6,7 @@ import HomeScreen from "../screens/home/HomeScreen";
 import WaterUsageScreen from "../screens/water-usage/WaterUsageScreen";
 import PaymentScreen from "../screens/payments/PaymentScreen";
 import ProfileScreen from "../screens/profile/ProfileScreen";
+import HomeStack from "./stacks/HomeStack";
 
 export type AppTabParams = {
   Home: undefined;
@@ -50,7 +51,7 @@ export default function AppNavigator() {
     >
       <Tab.Screen
         name="Home"
-        component={HomeScreen}
+        component={HomeStack}
         options={{ tabBarLabel: "Home" }}
       />
       <Tab.Screen
