@@ -12,6 +12,7 @@ import {
   setupGlobalErrorHandler,
   logger,
 } from "./src/utils/debug";
+import OfflineIndicator from "./src/components/shared/OfflineIndicator";
 
 export default function App() {
   useEffect(() => {
@@ -37,6 +38,7 @@ export default function App() {
         {/* PaperProvider: inject theme ke semua komponen Paper */}
         <PaperProvider theme={theme}>
           <ErrorBoundary>
+            <OfflineIndicator />
             <RootNavigator />
           </ErrorBoundary>
         </PaperProvider>
