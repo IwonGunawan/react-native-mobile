@@ -68,4 +68,8 @@ export const waterUsageService = {
   // Progress total checked meter water (per month)
   getProgress: () =>
     api.get<WaterUsageProgress>('/water-usage/progress').then(r => r.data),
+
+  // Mark Replaced to new kilometer
+  markReplaced: (waterUsageId: number) => 
+    api.put(`water-usage/${waterUsageId}/mark-replaced`).then(r => r.data),
 };
