@@ -7,6 +7,7 @@ import WaterUsageScreen from "../screens/water-usage/WaterUsageScreen";
 import PaymentScreen from "../screens/payments/PaymentScreen";
 import ProfileScreen from "../screens/profile/ProfileScreen";
 import HomeStack from "./stacks/HomeStack";
+import WaterUsageStack from "./stacks/WaterUsageStack";
 
 export type AppTabParams = {
   Home: undefined;
@@ -56,7 +57,7 @@ export default function AppNavigator() {
       />
       <Tab.Screen
         name="WaterUsage"
-        component={WaterUsageScreen}
+        component={WaterUsageStack}
         options={{ tabBarLabel: "Cek Air" }}
       />
       <Tab.Screen
