@@ -2,6 +2,7 @@ import { PaginatedResponse } from "../types";
 import api from "./api"
 import { WaterUsageQuery } from "./water-usage.service";
 
+/** HOME Menu */
 export interface RecentPayment {
   paymentId:    number;
   total:        number;
@@ -13,6 +14,9 @@ export interface RecentPayment {
   officer:      string;
 }
 
+
+/** PAYMENTS Menu */
+
 export interface Payment {
   customerId:     number,
   code:           string,
@@ -23,9 +27,9 @@ export interface Payment {
   finalTotal:     number,
 }
 
-export interface BillDetail {
+export interface Bill {
   customerId:     number,
-  waterUsages:    waterUsage,
+  waterUsages:    ListBill[],
   underpayment:   number,
   overpayment:    number,
   billTotal:      number,
@@ -38,15 +42,35 @@ export interface CreatePayment {
   saveChange:     number,
 }
 
-interface waterUsage {
+export interface PaymentReceipt {
+  refNumber:  string;
+  paidDate:   string;
+  total:       number;
+  cash:        number;
+  change:      number;
+  monthTotal: number;
+  textInfo:   string;
+}
+
+export interface PaymentHistory {
+  id:        number;
+  total:     number;
+  cash:      number;
+  logUuid:   string;
+  createdAt: string;
+}
+
+interface ListBill {
   waterUsageId:   number,
   month:          number,
   year:           number,
-  waterUsage:     number,
+  status:         string,
+  meterUsage:     number,
   totalPrice:     number,
 }
 
 export const paymentService = {
+  /** HOME MENU */
   // get recent payment limit 5
   getRecent: () => {
     return api.get<{ data: RecentPayment[] }>('/reports/monthly', {
@@ -59,23 +83,33 @@ export const paymentService = {
       },
     }).then(r => r.data.data);
   },
+  /** END Home Menu */
 
+  /** PAYMENT MENU */
+  // list payment 
   getAll: (params?: WaterUsageQuery) => {
-    return api.get<PaginatedResponse<Payment>>('/payments', {params})
+    return api.get<PaginatedResponse<Payment>>('/payments', { params })
     .then(r => r.data)
   },
 
+  // billing
   getBill: (customerId: number) => {
-    return api.get<BillDetail>('/payments/bill', {params: customerId})
+    console.log(customerId, 'customerId')
+    return api.get<Bill>('/payments/bill', { params: { customerId } })
     .then(r => r.data)
   },
 
+  // create payment
   create: (payload: CreatePayment) => {
-    return api.post('/payments', {payload}).then(r => r.data);
+    return api.post<PaymentReceipt>('/payments', payload)
+    .then(r => r.data);
   },
 
+  // histories payment
   histories: (customerId: number, params?: {page: number, limit: number}) => {
-    return api.get(`/payments/customer/${customerId}`).then(r => r.data);
+    return api.get<PaginatedResponse<PaymentHistory>>(`/payments/customer/${customerId}`, {params})
+    .then(r => r.data);
   }
+  /** END Payment Menu */
     
 }

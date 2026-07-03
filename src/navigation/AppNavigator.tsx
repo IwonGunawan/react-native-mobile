@@ -8,6 +8,7 @@ import PaymentScreen from "../screens/payments/PaymentScreen";
 import ProfileScreen from "../screens/profile/ProfileScreen";
 import HomeStack from "./stacks/HomeStack";
 import WaterUsageStack from "./stacks/WaterUsageStack";
+import PaymentStack from "./stacks/PaymentStack";
 
 export type AppTabParams = {
   Home: undefined;
@@ -62,7 +63,7 @@ export default function AppNavigator() {
       />
       <Tab.Screen
         name="Payment"
-        component={PaymentScreen}
+        component={PaymentStack}
         options={{ tabBarLabel: "Bayar Air" }}
       />
       <Tab.Screen
