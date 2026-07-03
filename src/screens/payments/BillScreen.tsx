@@ -26,7 +26,12 @@ import {
 } from "../../services/payment.service";
 import { PaymentStackParams } from "../../navigation/stacks/PaymentStack";
 import { colors } from "../../theme";
-import { formatRupiah, MONTHS } from "../../utils";
+import {
+  formatRupiah,
+  MONTHS,
+  formatNumberInput,
+  parseNumberInput,
+} from "../../utils";
 
 type Route = RouteProp<PaymentStackParams, "Bill">;
 
@@ -47,7 +52,7 @@ export default function BillScreen() {
   const [cash, setCash] = useState("");
   const [saveChange, setSaveChange] = useState(0);
 
-  const cashAmount = Number(cash) || 0;
+  const cashAmount = Number(parseNumberInput(cash)) || 0;
   const change = bill ? cashAmount - bill.finalTotal : 0;
   const isShort = change < 0;
   const isOver = change > 0;
@@ -366,7 +371,7 @@ export default function BillScreen() {
                     Uang Tunai
                   </Text>
                   <TextInput
-                    value={cash}
+                    value={formatNumberInput(cash)}
                     onChangeText={(v) => {
                       setCash(v);
                       setError(null);
