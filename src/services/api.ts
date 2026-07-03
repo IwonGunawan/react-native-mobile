@@ -17,7 +17,7 @@ api.interceptors.request.use((config) => {
   }
   
   if (__DEV__) {
-    logger.debug('API Request', {
+    logger.debug('➡️ API Request', {
       method: config.method?.toUpperCase(),
       url: config.url,
       hasToken: !!token,
@@ -29,16 +29,16 @@ api.interceptors.request.use((config) => {
 
 api.interceptors.response.use((response) => {
   if (__DEV__) {
-    logger.debug('API Response', {
+    logger.debug('🟢 API Response', {
       status: response.status,
       url: response.config.url,
-      data: response.data
+      // data: response.data
     });
   }
   return response;
 }, (error) => {
   if (__DEV__) {
-    logger.error('API Error', {
+    logger.error('🔴 API Error', {
       status: error.response?.status,
       message: error.response?.data?.message || error.message,
       url: error.config?.url,

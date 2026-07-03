@@ -5,6 +5,7 @@ export interface WaterUsageList {
   customerId: number;
   code:       string;
   name:       string;
+  villageId:  number;
   prefix:     string;
   isChecked:  number; // 1 = sudah, 0 = belum
 }

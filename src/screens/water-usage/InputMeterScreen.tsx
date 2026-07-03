@@ -286,6 +286,8 @@ export default function InputMeterScreen() {
                           >
                             {MONTHS[h.month]} {h.year}
                           </Text>
+
+                          {/* Marking for last usage kilometer physic */}
                           {h.lastUsed == "1" && (
                             <Chip
                               compact
@@ -294,6 +296,20 @@ export default function InputMeterScreen() {
                             >
                               Meter Lama
                             </Chip>
+                          )}
+
+                          {/* Tombol ganti meter — hanya record terbaru, belum ditandai */}
+                          {index === 0 && h.lastUsed === "0" && (
+                            <Button
+                              mode="outlined"
+                              compact
+                              onPress={() => handleMarkReplace(h.id)}
+                              loading={isReplacing === h.id}
+                              disabled={isReplacing !== null}
+                              labelStyle={styles.replaceLabel}
+                            >
+                              Ganti Meter
+                            </Button>
                           )}
                         </View>
 
@@ -327,20 +343,6 @@ export default function InputMeterScreen() {
                               {statusInfo.label}
                             </Text>
                           </View> */}
-
-                          {/* Tombol ganti meter — hanya record terbaru, belum ditandai */}
-                          {index === 0 && h.lastUsed === "0" && (
-                            <Button
-                              mode="text"
-                              compact
-                              onPress={() => handleMarkReplace(h.id)}
-                              loading={isReplacing === h.id}
-                              disabled={isReplacing !== null}
-                              labelStyle={styles.replaceLabel}
-                            >
-                              Ganti Meter
-                            </Button>
-                          )}
                         </View>
                       </View>
                       {index < history.length - 1 && <Divider />}

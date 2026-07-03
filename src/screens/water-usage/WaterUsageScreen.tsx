@@ -53,8 +53,6 @@ export default function WaterUsageScreen() {
 
   // defined states
   const [searchText, setSearchText] = useState<string>("");
-  // const checkCount = data.filter((c) => c.isChecked == 1).length;
-  // const unCheckCount = data.filter((c) => c.isChecked == 0).length;
 
   // debounce search - wait 500ms after user stop typing
   useEffect(() => {
