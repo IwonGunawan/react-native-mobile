@@ -1,6 +1,6 @@
 import { colors } from "../theme";
 
-export const formatRupiah = (n: number) => 'Rp' + n.toLocaleString('id-ID');
+export const formatRupiah = (n: number) => 'Rp ' + n.toLocaleString('id-ID');
 
 export const DAYS = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabut']
 
