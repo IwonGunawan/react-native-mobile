@@ -217,11 +217,17 @@ export default function BillScreen() {
               {/* Total card */}
               <Card style={styles.totalCard}>
                 <Card.Content style={styles.totalContent}>
-                  <Text variant="bodyMedium" style={styles.totalLabel}>
-                    Total yang harus dibayar
-                  </Text>
+                  {bill.finalTotal > 0 ? (
+                    <Text variant="bodyMedium" style={styles.totalLabel}>
+                      Total yang harus dibayar
+                    </Text>
+                  ) : (
+                    ""
+                  )}
                   <Text variant="headlineMedium" style={styles.totalValue}>
-                    {formatRupiah(bill.finalTotal)}
+                    {bill.finalTotal > 0
+                      ? formatRupiah(bill.finalTotal)
+                      : "LUNAS"}
                   </Text>
                 </Card.Content>
               </Card>
@@ -335,15 +341,19 @@ export default function BillScreen() {
                 </Card.Content>
               </Card>
 
-              <Button
-                mode="contained"
-                onPress={() => setStep("pay")}
-                style={styles.actionBtn}
-                contentStyle={styles.actionBtnContent}
-                icon="cash"
-              >
-                Lanjut ke Pembayaran
-              </Button>
+              {bill.finalTotal > 0 ? (
+                <Button
+                  mode="contained"
+                  onPress={() => setStep("pay")}
+                  style={styles.actionBtn}
+                  contentStyle={styles.actionBtnContent}
+                  icon="cash"
+                >
+                  Lanjut ke Pembayaran
+                </Button>
+              ) : (
+                ""
+              )}
             </View>
           )}
 
