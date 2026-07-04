@@ -50,12 +50,17 @@ export default function BillScreen() {
   const [isRefresh, setIsRefresh] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [cash, setCash] = useState("");
-  const [saveChange, setSaveChange] = useState(0);
+  const [savedAmount, setSavedAmount] = useState("");
 
+  // Derived values
   const cashAmount = Number(parseNumberInput(cash)) || 0;
   const change = bill ? cashAmount - bill.finalTotal : 0;
   const isShort = change < 0;
   const isOver = change > 0;
+  const savedRupiah = Number(savedAmount);
+  const cashBack = isOver ? change - savedRupiah : 0;
+  const savedError =
+    savedRupiah > change ? `Maksimal simpan ${formatRupiah(change)}` : null;
 
   // Fetch bill saat screen buka
   const fetchBill = async (isRefresh = false) => {
@@ -63,7 +68,6 @@ export default function BillScreen() {
     setError(null);
     try {
       const data = await paymentService.getBill(customer.customerId);
-      console.log(data, "getBill");
       setBill(data);
     } catch (err: any) {
       setError(err.response?.data?.message ?? "Gagal memuat tagihan");
@@ -79,17 +83,35 @@ export default function BillScreen() {
 
   const handlePay = async () => {
     if (!bill || cashAmount <= 0) return;
+
+    if (savedRupiah > change) {
+      setError("Uang disimpan melebihi kembalian");
+      return;
+    }
+
     setError(null);
     setIsPaying(true);
 
     try {
-      const result = await paymentService.create({
-        customerId: customer.customerId,
-        cash: cashAmount,
-        saveChange,
-      });
-      setReceipt(result);
-      setStep("receipt");
+      Alert.alert("Yakin ?", "Sudah Yakin Mau bayar ?", [
+        {
+          text: "Gak jadi",
+          style: "cancel",
+        },
+        {
+          text: "OKE",
+          style: "destructive",
+          onPress: async () => {
+            const result = await paymentService.create({
+              customerId: customer.customerId,
+              cash: cashAmount,
+              saveChange: Number(savedAmount),
+            });
+            setReceipt(result);
+            setStep("receipt");
+          },
+        },
+      ]);
     } catch (err: any) {
       setError(err.response?.data?.message ?? "Pembayaran gagal");
     } finally {
@@ -420,28 +442,80 @@ export default function BillScreen() {
                     </View>
                   )}
 
-                  {/* Simpan kembalian toggle */}
+                  {/* Simpan kembalian - hanya tampil jika ada kembalian */}
                   {isOver && (
-                    <View style={styles.saveChangeRow}>
-                      <View style={styles.saveChangeLeft}>
-                        <Text
-                          variant="bodyMedium"
-                          style={{ color: colors.textPrimary }}
-                        >
-                          Simpan kembalian
-                        </Text>
-                        <Text
-                          variant="bodySmall"
-                          style={{ color: colors.textSecondary }}
-                        >
-                          Gunakan untuk tagihan bulan depan
-                        </Text>
-                      </View>
-                      {/* <Switch
-                        value={saveChange}
-                        onValueChange={setSaveChange}
-                        color={colors.primary}
-                      /> */}
+                    <View style={styles.saveChangeSection}>
+                      <Text variant="titleSmall" style={styles.saveChangeTitle}>
+                        Simpan Kembalian
+                      </Text>
+                      <Text variant="bodySmall" style={styles.saveChangeSub}>
+                        Masukan nominal yang ingin disimpan untuk bulan depan
+                      </Text>
+
+                      <TextInput
+                        value={savedAmount}
+                        onChangeText={(v) => {
+                          setSavedAmount(v);
+                          setError;
+                        }}
+                        mode="outlined"
+                        keyboardType="numeric"
+                        style={styles.savedInput}
+                        left={<TextInput.Affix text="Rp" />}
+                      />
+
+                      {/* warning jika melebihi nominal kembalian */}
+                      {savedError && (
+                        <Text style={styles.savedErrorText}>{savedError}</Text>
+                      )}
+
+                      {/* Real-time breakdown */}
+                      {savedRupiah > 0 && !savedError && (
+                        <View style={styles.breakdownBox}>
+                          <View style={styles.breakdownRow}>
+                            <View style={styles.breakdownLeft}>
+                              <MaterialCommunityIcons
+                                name="piggy-bank-outline"
+                                size={16}
+                                color={colors.primary}
+                              />
+                              <Text
+                                variant="bodySmall"
+                                style={styles.breakdownLabel}
+                              >
+                                Disimpan
+                              </Text>
+                            </View>
+                            <Text
+                              variant="bodySmall"
+                              style={styles.breakdownSaved}
+                            >
+                              {formatRupiah(savedRupiah)}
+                            </Text>
+                          </View>
+                          <View style={[styles.breakdownRow, { marginTop: 8 }]}>
+                            <View style={styles.breakdownLeft}>
+                              <MaterialCommunityIcons
+                                name="cash"
+                                size={16}
+                                color={colors.textSecondary}
+                              />
+                              <Text
+                                variant="bodySmall"
+                                style={styles.breakdownLabel}
+                              >
+                                Uang Kembalian
+                              </Text>
+                            </View>
+                            <Text
+                              variant="bodySmall"
+                              style={styles.breakdownCash}
+                            >
+                              {formatRupiah(cashBack)}
+                            </Text>
+                          </View>
+                        </View>
+                      )}
                     </View>
                   )}
                 </Card.Content>
@@ -451,7 +525,7 @@ export default function BillScreen() {
                 mode="contained"
                 onPress={handlePay}
                 loading={isPaying}
-                disabled={isPaying || cashAmount <= 0}
+                disabled={isPaying || cashAmount <= 0 || !!savedError}
                 style={styles.actionBtn}
                 contentStyle={styles.actionBtnContent}
                 icon="check"
@@ -530,7 +604,7 @@ export default function BillScreen() {
                     label="Tagihan"
                     value={formatRupiah(receipt.total)}
                   />
-                  <ReceiptRow
+                  {/* <ReceiptRow
                     label="Tunai"
                     value={formatRupiah(receipt.cash)}
                   />
@@ -538,7 +612,7 @@ export default function BillScreen() {
                     label="Kembalian"
                     value={formatRupiah(receipt.change)}
                     bold
-                  />
+                  /> */}
 
                   <Text style={styles.receiptDivider}>{"─".repeat(36)}</Text>
                   <Text style={styles.receiptFooter}>{receipt.textInfo}</Text>
@@ -796,4 +870,49 @@ const styles = StyleSheet.create({
     color: "#555",
     marginTop: 4,
   },
+
+  saveChangeSection: {
+    marginTop: 4,
+    padding: 14,
+    backgroundColor: colors.primary + "08",
+    borderRadius: 10,
+    gap: 8,
+  },
+  saveChangeTitle: {
+    fontWeight: "600",
+    color: colors.textPrimary,
+  },
+  saveChangeSub: {
+    color: colors.textSecondary,
+    marginBottom: 4,
+  },
+  savedInput: {
+    backgroundColor: "#fff",
+  },
+  savedErrorText: {
+    color: colors.danger,
+    fontSize: 12,
+    marginTop: -4,
+  },
+  breakdownBox: {
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    padding: 12,
+    marginTop: 4,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  breakdownRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  breakdownLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  breakdownLabel: { color: colors.textSecondary },
+  breakdownSaved: { fontWeight: "700", color: colors.primary },
+  breakdownCash: { fontWeight: "600", color: colors.textPrimary },
 });
