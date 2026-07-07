@@ -8,7 +8,7 @@ import {
 import { Card, Chip, Searchbar, Text, Divider } from "react-native-paper";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { WaterUsageStackParams } from "../../navigation/stacks/WaterUsageStack";
-import { useNavigation } from "@react-navigation/native";
+import { useIsFocused, useNavigation } from "@react-navigation/native";
 import { useEffect, useState } from "react";
 import { Village } from "../../types";
 import { villageService } from "../../services/village.service";
@@ -37,6 +37,7 @@ function useVillages() {
 export default function WaterUsageScreen() {
   const navigation = useNavigation<Nav>();
   const villages = useVillages();
+  const isFocused = useIsFocused();
   const {
     data,
     isLoading,
@@ -62,6 +63,13 @@ export default function WaterUsageScreen() {
 
     return () => clearTimeout(timer);
   }, [searchText]);
+
+  // Refetch
+  useEffect(() => {
+    if (isFocused) {
+      refresh();
+    }
+  }, [isFocused]);
 
   const renderItem = ({ item }: { item: WaterUsageList }) => (
     <TouchableOpacity
@@ -124,7 +132,7 @@ export default function WaterUsageScreen() {
   );
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
       {/* Header */}
       <View style={styles.header}>
         <Text variant="titleLarge" style={styles.headerTitle}>

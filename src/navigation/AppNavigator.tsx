@@ -1,10 +1,6 @@
 import { useTheme } from "react-native-paper";
-import { colors, theme } from "../theme";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import HomeScreen from "../screens/home/HomeScreen";
-import WaterUsageScreen from "../screens/water-usage/WaterUsageScreen";
-import PaymentScreen from "../screens/payments/PaymentScreen";
 import ProfileScreen from "../screens/profile/ProfileScreen";
 import HomeStack from "./stacks/HomeStack";
 import WaterUsageStack from "./stacks/WaterUsageStack";
@@ -26,13 +22,30 @@ export default function AppNavigator() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
+
+        // Warna
         tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: "#9e9e9e",
+
         tabBarStyle: {
           backgroundColor: "#ffffff",
           borderTopColor: "#e0e0e0",
-          paddingBottom: 4,
+          borderTopWidth: 1,
           height: 60,
+          paddingTop: 4,
+          paddingBottom: 4,
+        },
+
+        // Label
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: "500",
+          marginTop: -2,
+        },
+
+        // Icon
+        tabBarIconStyle: {
+          marginBottom: 0,
         },
         tabBarIcon: ({ color, size }) => {
           const icons: Record<string, string> = {

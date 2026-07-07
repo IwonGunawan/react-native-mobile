@@ -33,7 +33,7 @@ export default function HomeScreen() {
   const arrearsHasMore = allArrears.length > 5;
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
       <FlatList
         data={data?.recentPayments ?? []}
         keyExtractor={(item) => item.paymentId.toString()}
