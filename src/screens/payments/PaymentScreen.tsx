@@ -8,7 +8,7 @@ import {
 import { useState, useEffect } from "react";
 import { Text, Searchbar, Chip, Card } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useNavigation } from "@react-navigation/native";
+import { useIsFocused, useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { villageService } from "../../services/village.service";
@@ -22,6 +22,7 @@ type Nav = NativeStackNavigationProp<PaymentStackParams, "PaymentList">;
 
 export default function PaymentsScreen() {
   const navigation = useNavigation<Nav>();
+  const isFocused = useIsFocused();
 
   const [villages, setVillages] = useState<{ id: number; name: string }[]>([]);
   const [searchText, setSearchText] = useState("");
@@ -54,6 +55,13 @@ export default function PaymentsScreen() {
     }, 500);
     return () => clearTimeout(timer);
   }, [searchText]);
+
+  // Refetch
+  useEffect(() => {
+    if (isFocused) {
+      refresh();
+    }
+  }, [isFocused]);
 
   const renderItem = ({ item }: { item: Payment }) => {
     return (

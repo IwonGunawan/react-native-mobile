@@ -30,7 +30,18 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
-    "plugins": ["expo-font", "expo-sharing"],
+    "plugins": [
+      "expo-font",
+      "expo-sharing",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "minSdkVersion": 26
+          }
+        }
+      ]
+    ],
     "extra": {
       "eas": {
         "projectId": "3077a6bf-9754-44f5-82c6-f6bb750e5f33"

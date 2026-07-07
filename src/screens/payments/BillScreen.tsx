@@ -6,6 +6,7 @@ import {
   Platform,
   Alert,
   RefreshControl,
+  TouchableOpacity,
 } from "react-native";
 import { useState, useEffect } from "react";
 import {
@@ -15,6 +16,7 @@ import {
   Card,
   Divider,
   Switch,
+  ActivityIndicator,
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
@@ -32,6 +34,9 @@ import {
   formatNumberInput,
   parseNumberInput,
 } from "../../utils";
+import { usePrinter } from "../../hooks/usePrinter";
+import { ReceiptData } from "../../services/receipt/printer.service";
+import PrinterSelectorModal from "../../components/shared/PrinterSelectorModal";
 
 type Route = RouteProp<PaymentStackParams, "Bill">;
 
@@ -41,6 +46,7 @@ export default function BillScreen() {
   const navigation = useNavigation();
   const route = useRoute<Route>();
   const { customer } = route.params;
+  const printer = usePrinter();
 
   const [step, setStep] = useState<Step>("bill");
   const [bill, setBill] = useState<Bill | null>(null);
@@ -119,7 +125,43 @@ export default function BillScreen() {
     }
   };
 
-  const handleDone = () => navigation.goBack();
+  // build receipt data dari response api
+  const buildReceiptData = (): ReceiptData | null => {
+    if (!receipt) return null;
+    return {
+      refNumber: receipt.refNumber,
+      paidDate: receipt.paidDate,
+      prefix: customer.prefix,
+      customerName: customer.name,
+      monthTotal: receipt.monthTotal,
+      total: receipt.total,
+      textInfo: receipt.textInfo,
+
+      // review
+      cash: receipt.cash,
+      change: receipt.change,
+      savedAmount: savedRupiah,
+    };
+  };
+
+  // handler print
+  const handlePrint = async () => {
+    const data = buildReceiptData();
+    if (!data) return;
+    await printer.print(data);
+  };
+
+  // handler share PDF
+  const handleSharePdf = async () => {
+    const data = buildReceiptData();
+    if (!data) return;
+    await printer.shareAsPdf(data);
+  };
+
+  // handler done
+  const handleDone = () => {
+    navigation.goBack();
+  };
 
   if (isLoading) {
     return (
@@ -604,7 +646,7 @@ export default function BillScreen() {
                     label="Tagihan"
                     value={formatRupiah(receipt.total)}
                   />
-                  {/* <ReceiptRow
+                  <ReceiptRow
                     label="Tunai"
                     value={formatRupiah(receipt.cash)}
                   />
@@ -612,13 +654,89 @@ export default function BillScreen() {
                     label="Kembalian"
                     value={formatRupiah(receipt.change)}
                     bold
-                  /> */}
+                  />
+                  {savedRupiah > 0 && (
+                    <>
+                      <ReceiptRow
+                        label="Disimpan"
+                        value={formatRupiah(savedRupiah)}
+                      />
+                      <ReceiptRow
+                        label="Cash back"
+                        value={formatRupiah(receipt.change - savedRupiah)}
+                      />
+                    </>
+                  )}
 
                   <Text style={styles.receiptDivider}>{"─".repeat(36)}</Text>
                   <Text style={styles.receiptFooter}>{receipt.textInfo}</Text>
                 </Card.Content>
               </Card>
 
+              {/* Print status */}
+              {printer.isPrinting && (
+                <View style={styles.printStatus}>
+                  <ActivityIndicator color={colors.primary} size="small">
+                    <Text
+                      variant="bodySmall"
+                      style={{ color: colors.textSecondary }}
+                    >
+                      {printer.status === "connecting"
+                        ? "Menghubungkan Printer..."
+                        : "Mencetak..."}
+                    </Text>
+                  </ActivityIndicator>
+                </View>
+              )}
+
+              {/* Action Buttons */}
+              <View style={styles.receiptActions}>
+                {/* 1. print bluetooth */}
+                <Button
+                  mode="contained"
+                  onPress={handlePrint}
+                  disabled={printer.isPrinting}
+                  loading={printer.isPrinting}
+                  icon="printer"
+                  style={[styles.actionBtn, { flex: 1 }]}
+                  contentStyle={styles.actionBtnContent}
+                >
+                  Print
+                </Button>
+                {/* 2. Share PDF */}
+                <Button
+                  mode="outlined"
+                  onPress={handleSharePdf}
+                  disabled={printer.isPrinting}
+                  icon="share-variant"
+                  style={[styles.actionBtn, { flex: 1 }]}
+                  contentStyle={styles.actionBtnContent}
+                >
+                  Share PDF
+                </Button>
+              </View>
+
+              {/* Ganti Printer */}
+              {printer.savedPrinter && (
+                <TouchableOpacity
+                  style={styles.changePrinter}
+                  onPress={() => {
+                    const data = buildReceiptData();
+                    if (data) printer.changePrinter(data);
+                  }}
+                >
+                  <MaterialCommunityIcons
+                    name="printer-settings"
+                    size={14}
+                    color={colors.textSecondary}
+                  />
+                  <Text style={styles.changePrinterText}>
+                    Printer: {printer.savedPrinter.deviceName} · Ganti
+                  </Text>
+                </TouchableOpacity>
+              )}
+
+              {/* Selesai */}
               <Button
                 mode="contained"
                 onPress={handleDone}
@@ -630,6 +748,11 @@ export default function BillScreen() {
               </Button>
             </View>
           )}
+          <PrinterSelectorModal
+            visible={printer.showSelector}
+            onSelect={printer.onPrinterSelected}
+            onClose={printer.closeSelector}
+          />
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -915,4 +1038,29 @@ const styles = StyleSheet.create({
   breakdownLabel: { color: colors.textSecondary },
   breakdownSaved: { fontWeight: "700", color: colors.primary },
   breakdownCash: { fontWeight: "600", color: colors.textPrimary },
+
+  // printer & share pdf
+  printStatus: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    paddingVertical: 8,
+  },
+  receiptActions: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 4,
+  },
+  changePrinter: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    paddingVertical: 12,
+  },
+  changePrinterText: {
+    fontSize: 12,
+    color: colors.textSecondary,
+  },
 });
