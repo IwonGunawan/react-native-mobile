@@ -57,7 +57,7 @@ export default function BillScreen() {
   const change = bill ? cashAmount - bill.finalTotal : 0;
   const isShort = change < 0;
   const isOver = change > 0;
-  const savedRupiah = Number(savedAmount);
+  const savedRupiah = Number(parseNumberInput(savedAmount));
   const cashBack = isOver ? change - savedRupiah : 0;
   const savedError =
     savedRupiah > change ? `Maksimal simpan ${formatRupiah(change)}` : null;
@@ -105,7 +105,7 @@ export default function BillScreen() {
             const result = await paymentService.create({
               customerId: customer.customerId,
               cash: cashAmount,
-              saveChange: Number(savedAmount),
+              saveChange: Number(parseNumberInput(savedAmount)),
             });
             setReceipt(result);
             setStep("receipt");
@@ -453,7 +453,7 @@ export default function BillScreen() {
                       </Text>
 
                       <TextInput
-                        value={savedAmount}
+                        value={formatNumberInput(savedAmount)}
                         onChangeText={(v) => {
                           setSavedAmount(v);
                           setError;
