@@ -1,6 +1,7 @@
 import { useTheme } from "react-native-paper";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ProfileScreen from "../screens/profile/ProfileScreen";
 import HomeStack from "./stacks/HomeStack";
 import WaterUsageStack from "./stacks/WaterUsageStack";
@@ -15,8 +16,13 @@ export type AppTabParams = {
 
 const Tab = createBottomTabNavigator<AppTabParams>();
 
+const BASE_TAB_HEIGHT = 60;
+
 export default function AppNavigator() {
   const { colors } = useTheme();
+  // Pakai inset bottom Android agar tab bar tidak tertutup gesture/3-button nav.
+  const insets = useSafeAreaInsets();
+  const tabBarHeight = BASE_TAB_HEIGHT + insets.bottom;
 
   return (
     <Tab.Navigator
@@ -31,9 +37,10 @@ export default function AppNavigator() {
           backgroundColor: "#ffffff",
           borderTopColor: "#e0e0e0",
           borderTopWidth: 1,
-          height: 60,
+          height: tabBarHeight,
           paddingTop: 4,
-          paddingBottom: 4,
+          // Tambahkan inset.bottom supaya label tidak mepet ke navigation bar.
+          paddingBottom: 4 + insets.bottom,
         },
 
         // Label
