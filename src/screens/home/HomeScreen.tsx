@@ -277,14 +277,10 @@ export default function HomeScreen() {
 
               <View style={styles.txInfo}>
                 <Text variant="bodyMedium" style={styles.txName}>
-                  {item.prefix} {item.customerName}
+                  {item.customerName}
                 </Text>
                 <Text variant="bodySmall" style={styles.txVillage}>
-                  {item.village}
-                </Text>
-                <Text variant="bodySmall" style={styles.txOfficer}>
-                  diterima oleh{" "}
-                  <Text style={{ fontWeight: "700" }}>{item.officer}</Text>
+                  {item.village} · {item.officer}
                 </Text>
               </View>
 

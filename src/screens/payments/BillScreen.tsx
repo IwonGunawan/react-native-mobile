@@ -20,6 +20,7 @@ import {
 } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import {
   paymentService,
@@ -39,11 +40,12 @@ import { ReceiptData } from "../../services/receipt/printer.service";
 import PrinterSelectorModal from "../../components/shared/PrinterSelectorModal";
 
 type Route = RouteProp<PaymentStackParams, "Bill">;
+type Navigation = NativeStackNavigationProp<PaymentStackParams, "Bill">;
 
 type Step = "bill" | "pay" | "receipt";
 
 export default function BillScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<Navigation>();
   const route = useRoute<Route>();
   const { customer } = route.params;
   const printer = usePrinter();
@@ -418,6 +420,31 @@ export default function BillScreen() {
               ) : (
                 ""
               )}
+
+              <Card style={[styles.infoCard, { marginTop: 24 }]}>
+                <Card.Content style={styles.infoContent}>
+                  <MaterialCommunityIcons
+                    name="information-outline"
+                    size={20}
+                    color={colors.info}
+                  />
+                  <Text variant="bodySmall" style={styles.infoText}>
+                    {bill.textInfo}
+                  </Text>
+                </Card.Content>
+              </Card>
+
+              <Button
+                mode="outlined"
+                onPress={() =>
+                  navigation.navigate("PaymentHistory", { customer })
+                }
+                style={styles.historyBtn}
+                contentStyle={styles.historyBtnContent}
+                icon="format-list-bulleted"
+              >
+                Lihat Semua Transaksi
+              </Button>
             </View>
           )}
 
@@ -908,6 +935,31 @@ const styles = StyleSheet.create({
   },
   detailLabel: { color: colors.textSecondary },
   detailValue: { fontWeight: "600", color: colors.textPrimary },
+
+  // Last payment info
+  infoCard: {
+    borderRadius: 12,
+    marginBottom: 12,
+    backgroundColor: "#fff",
+    elevation: 1,
+  },
+  infoContent: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 10,
+  },
+  infoText: {
+    flex: 1,
+    color: colors.textPrimary,
+    lineHeight: 19,
+    fontSize: 13,
+  },
+  historyBtn: {
+    borderRadius: 12,
+    marginBottom: 12,
+    borderColor: colors.primary,
+  },
+  historyBtnContent: { paddingVertical: 6 },
 
   // Cash input
   cashInput: { backgroundColor: "#fff", marginBottom: 12 },

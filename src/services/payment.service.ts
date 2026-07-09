@@ -33,7 +33,8 @@ export interface Bill {
   underpayment:   number,
   overpayment:    number,
   billTotal:      number,
-  finalTotal:     number
+  finalTotal:     number,
+  textInfo:      string,
 }
 
 export interface CreatePayment {

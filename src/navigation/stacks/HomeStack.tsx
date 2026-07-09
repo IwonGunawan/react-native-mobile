@@ -1,6 +1,6 @@
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import HomeScreen from "../../screens/home/HomeScreen";
-import PaymentHistoryScreen from "../../screens/payments/PaymentHistoryScreen";
+import PaymentHistoryScreen from "../../screens/home/PaymentHistoryScreen";
 
 export type HomeStackParams = {
   HomeMain: undefined;

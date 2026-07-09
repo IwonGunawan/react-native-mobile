@@ -130,7 +130,7 @@ export default function PaymentHistoryScreen() {
 
               <View style={styles.txInfo}>
                 <Text variant="bodyMedium" style={styles.txName}>
-                  {item.prefix} {item.customerName}
+                  {item.customerName}
                 </Text>
                 <Text variant="bodySmall" style={styles.txMeta}>
                   {item.village} · {item.officer}

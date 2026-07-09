@@ -21,9 +21,10 @@ export interface ReceiptData {
   savedAmount: number;
 }
 
-let ThermalPrinter:any;
+let BLEPrinter: any;
 try {
-  ThermalPrinter = require('@conodene/react-native-thermal-receipt-printer-image-qr');
+  const ThermalPrinter = require('@conodene/react-native-thermal-receipt-printer-image-qr');
+  BLEPrinter = ThermalPrinter.BLEPrinter;
 } catch (error) {
   console.warn('ThermalPrinter lib not available', error);
 }
@@ -35,8 +36,10 @@ const CHARS_PER_LINE = 32; // 58mm = 32 chars
 
 // liist device pairing
 const getPairedDevices = async (): Promise<PrinterDevice[]> => {
-  if (!ThermalPrinter) throw new Error('Printer module tidak tersedia');
-  const devices = await ThermalPrinter.default.getDeviceList();
+  if (!BLEPrinter) throw new Error('Bluetooth printer module tidak tersedia');
+
+  await BLEPrinter.init();
+  const devices = await BLEPrinter.getDeviceList();
   return devices ?? [];
 };
 
@@ -123,13 +126,14 @@ const printReceipt = async (
   device: PrinterDevice,
   data: ReceiptData,
 ): Promise<void> => {
-  if (!ThermalPrinter) throw new Error('Printer module tidak tersedia');
+  if (!BLEPrinter) throw new Error('Bluetooth printer module tidak tersedia');
 
-  await ThermalPrinter.default.connectPrinter(device.innerMacAddress);
+  await BLEPrinter.init();
+  await BLEPrinter.connectPrinter(device.innerMacAddress);
 
   const text = buildReceiptText(data);
 
-  await ThermalPrinter.default.printBill(text);
+  await BLEPrinter.printBill(text);
 };
 
 export const printerService = {
