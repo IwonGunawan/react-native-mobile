@@ -44,22 +44,28 @@ export interface CreatePayment {
 }
 
 export interface PaymentReceipt {
-  refNumber:  string;
-  paidDate:   string;
-  total:       number;
-  cash:        number;
-  change:      number;
-  monthTotal: number;
-  textInfo:   string;
+  refNumber:    string;
+  paidDate:     string;
+  total:        number;
+  cash:         number;
+  change:       number;
+  monthTotal:   number;
+  textInfo:     string;
 }
 
-export interface PaymentHistory {
-  id:        number;
-  total:     number;
-  cash:      number;
-  logUuid:   string;
-  createdAt: string;
-}
+  export interface PaymentHistory {
+    id:          number;
+    total:       number;
+    cash:        number;
+    logUuid:     string;
+    createdAt:   string;
+    change:      number;
+    monthTotal:  number;
+    savedAmount: number;
+    textInfo:    string;
+    refNumber:   string;
+    status:     string;
+  }
 
 interface ListBill {
   waterUsageId:   number,
@@ -95,7 +101,6 @@ export const paymentService = {
 
   // billing
   getBill: (customerId: number) => {
-    console.log(customerId, 'customerId')
     return api.get<Bill>('/payments/bill', { params: { customerId } })
     .then(r => r.data)
   },

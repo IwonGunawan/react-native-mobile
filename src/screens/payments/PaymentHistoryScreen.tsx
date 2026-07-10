@@ -8,7 +8,10 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { PaymentHistory, paymentService } from "../../services/payment.service";
 import { PaymentStackParams } from "../../navigation/stacks/PaymentStack";
 import { colors } from "../../theme";
-import { formatRupiah } from "../../utils";
+import { formatRupiah, STATUS_MAP } from "../../utils";
+import { usePrinter } from "../../hooks/usePrinter";
+import { ReceiptData } from "../../services/receipt/printer.service";
+import PrinterSelectorModal from "../../components/shared/PrinterSelectorModal";
 
 type Route = RouteProp<PaymentStackParams, "PaymentHistory">;
 type Navigation = NativeStackNavigationProp<
@@ -20,6 +23,7 @@ export default function PaymentHistoryScreen() {
   const navigation = useNavigation<Navigation>();
   const route = useRoute<Route>();
   const { customer } = route.params;
+  const printer = usePrinter();
 
   const [data, setData] = useState<PaymentHistory[]>([]);
   const [page, setPage] = useState(1);
@@ -28,8 +32,34 @@ export default function PaymentHistoryScreen() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [printingId, setPrintingId] = useState<number | null>(null);
 
   const hasMore = page < totalPages;
+
+  // Bangun ReceiptData dari history item + info customer
+  const buildReceiptData = (item: PaymentHistory): ReceiptData => ({
+    refNumber: item.refNumber || item.logUuid,
+    paidDate: item.createdAt,
+    prefix: customer.prefix,
+    customerName: customer.name,
+    monthTotal: item.monthTotal ?? 0,
+    total: item.total,
+    textInfo: item.textInfo || "Terima kasih atas pembayaran",
+    cash: item.cash,
+    change: item.change ?? Math.max(item.cash - item.total, 0),
+    savedAmount: item.savedAmount ?? 0,
+  });
+
+  // Handler print struk per item history
+  const handlePrint = async (item: PaymentHistory) => {
+    if (printingId !== null) return;
+    setPrintingId(item.id);
+    try {
+      await printer.print(buildReceiptData(item));
+    } finally {
+      setPrintingId(null);
+    }
+  };
 
   const fetchData = useCallback(
     async (pageNum = 1, isRefresh = false) => {
@@ -77,6 +107,8 @@ export default function PaymentHistoryScreen() {
 
   const renderItem = ({ item }: { item: PaymentHistory }) => {
     const paidDate = new Date(item.createdAt);
+    const isPrintingThis = printingId === item.id;
+    const statusInfo = STATUS_MAP[item.status] ?? STATUS_MAP["1"];
 
     return (
       <Card style={styles.txCard}>
@@ -109,9 +141,27 @@ export default function PaymentHistoryScreen() {
             </Text>
           </View>
 
-          <Text variant="bodySmall" style={styles.refText}>
-            #{item.logUuid.slice(0, 8).toUpperCase()}
-          </Text>
+          <View style={styles.rightActions}>
+            <View
+              style={[styles.statusBadge, { backgroundColor: statusInfo.bg }]}
+            >
+              <Text
+                variant="labelSmall"
+                style={[styles.statusBadgeText, { color: statusInfo.color }]}
+              >
+                {statusInfo.label}
+              </Text>
+            </View>
+            <IconButton
+              icon="printer"
+              size={20}
+              iconColor={colors.primary}
+              loading={isPrintingThis}
+              disabled={printingId !== null}
+              onPress={() => handlePrint(item)}
+              style={styles.printBtn}
+            />
+          </View>
         </Card.Content>
       </Card>
     );
@@ -126,7 +176,7 @@ export default function PaymentHistoryScreen() {
             Semua Transaksi
           </Text>
           <Text variant="bodySmall" style={styles.headerSub}>
-            {customer.prefix} {customer.name}
+            {customer.name}
           </Text>
         </View>
       </View>
@@ -184,6 +234,11 @@ export default function PaymentHistoryScreen() {
         }
         contentContainerStyle={styles.list}
       />
+      <PrinterSelectorModal
+        visible={printer.showSelector}
+        onSelect={printer.onPrinterSelected}
+        onClose={printer.closeSelector}
+      />
     </SafeAreaView>
   );
 }
@@ -234,7 +289,24 @@ const styles = StyleSheet.create({
   txInfo: { flex: 1 },
   txTitle: { fontWeight: "700", color: colors.primary },
   txMeta: { color: colors.textSecondary, marginTop: 2 },
-  refText: { color: colors.textSecondary, flexShrink: 0 },
+  rightActions: {
+    alignItems: "flex-end",
+    gap: 2,
+    flexShrink: 0,
+  },
+  printBtn: {
+    margin: 0,
+  },
+  statusBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 999,
+  },
+  statusBadgeText: {
+    fontWeight: "700",
+    fontSize: 11,
+    letterSpacing: 0.3,
+  },
   divider: { marginVertical: 6, opacity: 0 },
 
   empty: {

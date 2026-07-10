@@ -2,8 +2,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { formatRupiah } from "../../utils";
 
 export interface PrinterDevice {
-  deviceName: string;
-  innerMacAddress: string;
+  device_name: string;
+  inner_mac_address: string;
 }
 
 export interface ReceiptData {
@@ -35,12 +35,16 @@ const CHARS_PER_LINE = 32; // 58mm = 32 chars
 /** ============ DEVICE MANAGEMENT ============*/
 
 // liist device pairing
-const getPairedDevices = async (): Promise<PrinterDevice[]> => {
-  if (!BLEPrinter) throw new Error('Bluetooth printer module tidak tersedia');
+const getPairedDevices = async (): Promise<PrinterDevice[] | undefined> => {
+  try {
+    if (!BLEPrinter) throw new Error('Bluetooth printer module tidak tersedia');
 
-  await BLEPrinter.init();
-  const devices = await BLEPrinter.getDeviceList();
-  return devices ?? [];
+    await BLEPrinter.init();
+    const devices = await BLEPrinter.getDeviceList();
+    return devices ?? [];
+  } catch (error) {
+    console.log('Failed pairing devices', error)
+  }
 };
 
 // save device to AsyncStorage
@@ -49,10 +53,19 @@ const savePrinter = async (device: PrinterDevice): Promise<void> => {
 }
 
 // get device from AsynStorage
-const getSavedPrinter = async(): Promise<PrinterDevice | null> => {
-  const raw = await AsyncStorage.getItem(PRINTER_STORAGE_KEY);
-  return raw ? JSON.parse(raw) : null;
-}
+const getSavedPrinter = async (): Promise<PrinterDevice | null> => {
+  try {
+    const raw = await AsyncStorage.getItem(PRINTER_STORAGE_KEY);
+    console.log('getSavedPrinter', raw);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed?.inner_mac_address) throw new Error('invalid');
+    return parsed;
+  } catch {
+    await AsyncStorage.removeItem(PRINTER_STORAGE_KEY); // bersihkan data rusak
+    return null;
+  }
+};
 
 // clear saved devices
 const clearSavedPrinter = async(): Promise<void> => {
@@ -79,6 +92,7 @@ const divider = (char = '-'): string => char.repeat(CHARS_PER_LINE);
 
 /** ============ BUILD RECEIPT TEXT ============*/
 const buildReceiptText = (data: ReceiptData): string => {
+  console.log('buildReceiptText');
   const paidDate = new Date(data.paidDate);
   const dateStr  = paidDate.toLocaleDateString('id-ID', {
     day: '2-digit', month: 'short', year: 'numeric',
@@ -92,20 +106,17 @@ const buildReceiptText = (data: ReceiptData): string => {
     centerText('CIKARET SETRA'),
     divider('='),
     formatLine('No.Ref:', data.refNumber.slice(0, 8).toUpperCase()),
-    formatLine('Pelanggan:', `${data.prefix} ${data.customerName}`.slice(0, 18)),
+    formatLine('Nama:', `${data.prefix} ${data.customerName}`.slice(0, 18)),
     formatLine('Tgl Bayar:', dateStr),
     formatLine('Jam:', timeStr),
     formatLine('Jml Bulan:', `${data.monthTotal} bulan`),
     divider('-'),
     formatLine('Tagihan:', formatRupiah(data.total)),
-    formatLine('Tunai:', formatRupiah(data.cash)),
-    formatLine('Kembalian:', formatRupiah(data.change)),
   ];
 
   // Tampilkan baris simpan hanya kalau ada
   if (data.savedAmount > 0) {
     lines.push(formatLine('Disimpan:', formatRupiah(data.savedAmount)));
-    lines.push(formatLine('Cash back:', formatRupiah(data.change - data.savedAmount)));
   }
 
   lines.push(
@@ -126,14 +137,17 @@ const printReceipt = async (
   device: PrinterDevice,
   data: ReceiptData,
 ): Promise<void> => {
-  if (!BLEPrinter) throw new Error('Bluetooth printer module tidak tersedia');
+  try {
+    if (!BLEPrinter) throw new Error('Bluetooth printer module tidak tersedia');
 
-  await BLEPrinter.init();
-  await BLEPrinter.connectPrinter(device.innerMacAddress);
+    await BLEPrinter.init();
+    await BLEPrinter.connectPrinter(device.inner_mac_address);
 
-  const text = buildReceiptText(data);
-
-  await BLEPrinter.printBill(text);
+    const text = buildReceiptText(data);
+    await BLEPrinter.printBill(text);
+  } catch (error) {
+    console.log('Error printReceipt', error)
+  }
 };
 
 export const printerService = {

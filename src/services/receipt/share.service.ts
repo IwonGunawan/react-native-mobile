@@ -87,10 +87,6 @@ const shareReceiptAsPdf = async (data: ReceiptData): Promise<void> => {
           <span>Disimpan</span>
           <span>${formatRupiah(data.savedAmount)}</span>
         </div>
-        <div class="row">
-          <span>Cash back</span>
-          <span>${formatRupiah(data.change - data.savedAmount)}</span>
-        </div>
       ` : ''}
 
       <div class="divider"></div>

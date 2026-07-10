@@ -1,5 +1,5 @@
 import { useState, useCallback }         from 'react';
-import { Alert }                         from 'react-native';
+import { Alert, PermissionsAndroid, Platform }                         from 'react-native';
 import { printerService, PrinterDevice, ReceiptData } from '../services/receipt/printer.service';
 import { shareService }                  from '../services/receipt/share.service';
 
@@ -22,7 +22,9 @@ export function usePrinter() {
   // Print — cek saved printer dulu
   const print = useCallback(async (data: ReceiptData) => {
     setError(null);
+    await ensureBluetoothPermission();
     const device = await printerService.getSavedPrinter();
+    
 
     if (device) {
       // Sudah ada printer tersimpan → langsung print
@@ -33,6 +35,22 @@ export function usePrinter() {
       setShowSelector(true);
     }
   }, []);
+
+  // di usePrinter.print, sebelum panggil getSavedPrinter
+
+async function ensureBluetoothPermission() {
+  if (Platform.OS !== 'android') return true;
+  if (Platform.Version < 31) return true; // pre-Android 12
+
+  const granted = await PermissionsAndroid.requestMultiple([
+    PermissionsAndroid.PERMISSIONS.BLUETOOTH_CONNECT,
+    PermissionsAndroid.PERMISSIONS.BLUETOOTH_SCAN,
+  ]);
+  return (
+    granted['android.permission.BLUETOOTH_CONNECT'] === 'granted' &&
+    granted['android.permission.BLUETOOTH_SCAN'] === 'granted'
+  );
+}
 
   // Dipanggil setelah user pilih printer dari selector
   const onPrinterSelected = useCallback(async (device: PrinterDevice) => {

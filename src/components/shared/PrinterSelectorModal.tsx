@@ -26,7 +26,7 @@ export default function PrinterSelectorModal({
   onSelect,
   onClose,
 }: Props) {
-  const [devices, setDevices] = useState<PrinterDevice[]>([]);
+  const [devices, setDevices] = useState<PrinterDevice[] | undefined>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -40,12 +40,13 @@ export default function PrinterSelectorModal({
     setError(null);
     try {
       const list = await printerService.getPairedDevices();
-      setDevices(list);
-      if (list.length === 0) {
+      console.log(list);
+      if (!list || list.length === 0) {
         setError(
           "Tidak ada perangkat Bluetooth yang di-pair.\nPair printer di Settings → Bluetooth terlebih dahulu.",
         );
       }
+      setDevices(list);
     } catch (err: any) {
       setError(err.message ?? "Gagal scan perangkat Bluetooth");
     } finally {
@@ -105,7 +106,7 @@ export default function PrinterSelectorModal({
           ) : (
             <FlatList
               data={devices}
-              keyExtractor={(item) => item.innerMacAddress}
+              keyExtractor={(item) => item.inner_mac_address}
               renderItem={({ item }) => (
                 <TouchableOpacity
                   style={styles.deviceItem}
@@ -121,10 +122,10 @@ export default function PrinterSelectorModal({
                   </View>
                   <View style={styles.deviceInfo}>
                     <Text variant="bodyMedium" style={styles.deviceName}>
-                      {item.deviceName}
+                      {item.device_name}
                     </Text>
                     <Text variant="bodySmall" style={styles.deviceMac}>
-                      {item.innerMacAddress}
+                      {item.inner_mac_address}
                     </Text>
                   </View>
                   <MaterialCommunityIcons
