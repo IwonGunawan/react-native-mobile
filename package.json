@@ -42,7 +42,12 @@
     "android:build-client": "expo start --dev-client",
     "ios": "expo run:ios",
     "web": "expo start --web",
-    "type:checking": "npx tsc --noEmit"
+    "type:checking": "npx tsc --noEmit",
+    "logcat:all": "adb logcat -v color",
+    "logcat:js": "adb logcat -s ReactNativeJS:V ReactNative:V",
+    "logcat:errors": "adb logcat *:E ReactNativeJS:V",
+    "logcat:crash": "adb logcat -d -b crash",
+    "logcat:fatal": "adb logcat -s AndroidRuntime:E ReactNativeJS:E *:F"
   },
   "private": true
 }

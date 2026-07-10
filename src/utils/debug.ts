@@ -1,40 +1,30 @@
 /**
- * Debugging utilities untuk development
- * Enable logging, error tracking, dan network monitoring
+ * Global error & network wiring.
+ *
+ * - Logger + persistent crash buffer: `./logcat`
+ * - JS unhandled errors: `ErrorUtils.setGlobalHandler` (RN core)
+ * - JS unhandled promise rejections: `unhandledrejection` event
+ * - JS uncaught exceptions: `process.on('uncaughtException')` if available
+ * - Axios interceptors for request/response/error logging
+ *
+ * Native force-close: tidak bisa dicegat dari JS. Cara membacanya:
+ *   adb logcat -d -b crash                  # system crash buffer
+ *   adb logcat *:E                          # semua error
+ *   adb logcat -s ReactNativeJS:V           # semua log JS
  */
 
 import axios from 'axios';
 import { useAuthStore } from '../stores/auth.store';
+import { logger } from './logcat';
 
-/**
- * Logger dengan emoji prefix (lebih readable di terminal/emulator)
- * %c color codes hanya bekerja di browser DevTools, bukan di terminal React Native
- */
-export const logger = {
-  info: (msg: string, data?: any) => {
-    console.log(`ℹ️  [INFO] ${msg}`, data);
-  },
-  error: (msg: string, data?: any) => {
-    console.error(`❌ [ERROR] ${msg}`, data);
-  },
-  warn: (msg: string, data?: any) => {
-    console.warn(`⚠️  [WARN] ${msg}`, data);
-  },
-  debug: (msg: string, data?: any) => {
-    if (__DEV__) {
-      console.log(`[DEBUG] ${msg}`, data);
-    }
-  },
-};
+export { logger } from './logcat';
 
 /**
  * Setup Axios interceptors untuk monitoring network
  */
 export const setupAxiosInterceptors = () => {
-  // Request interceptor
   axios.interceptors.request.use(
     (config) => {
-      // Read current token from zustand store without using React hooks
       const token = useAuthStore.getState().token;
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
@@ -54,10 +44,9 @@ export const setupAxiosInterceptors = () => {
     (error) => {
       logger.error('Request Setup Error', error);
       return Promise.reject(error);
-    }
+    },
   );
 
-  // Response interceptor
   axios.interceptors.response.use(
     (response) => {
       if (__DEV__) {
@@ -76,20 +65,57 @@ export const setupAxiosInterceptors = () => {
         message: error.response?.data?.message || error.message,
       });
       return Promise.reject(error);
-    }
+    },
   );
 };
 
 /**
- * Setup global error handler
+ * Install global handlers. Idempotent: aman dipanggil berulang.
  */
 export const setupGlobalErrorHandler = () => {
-  // Handle unhandled promise rejections
-  if (__DEV__) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (globalThis as any).unhandledRejection = (reason: any, promise: Promise<any>) => {
-      logger.error('Unhandled Promise Rejection', { reason, promise });
-    };
+  // 1) RN core: unhandled JS errors. `ErrorUtils` selalu ada di runtime RN.
+  const ErrorUtils = (globalThis as any).ErrorUtils;
+  if (ErrorUtils?.setGlobalHandler) {
+    const previous = ErrorUtils.getGlobalHandler?.();
+    ErrorUtils.setGlobalHandler((error: Error, isFatal?: boolean) => {
+      logger.error(
+        `Unhandled JS error${isFatal ? ' (FATAL)' : ''}`,
+        error,
+      );
+      // Chain to default RN handler so red box / native crash still fires.
+      previous?.(error, isFatal);
+    });
+  }
+
+  // 2) Unhandled promise rejections. Polyfill `process` jika tidak ada.
+  const proc: any = (globalThis as any).process ?? {
+    on: () => {},
+    addListener: () => {},
+  };
+  const onRejection = (reason: unknown) => {
+    logger.error('Unhandled Promise Rejection', reason);
+  };
+  if (typeof proc.on === 'function') {
+    proc.on('unhandledRejection', onRejection);
+  }
+  if (typeof proc.addListener === 'function') {
+    proc.addListener('unhandledRejection', onRejection);
+  }
+  // `unhandledrejection` event di globalThis (Hermes meniru ini juga).
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const g: any = globalThis as any;
+  if (typeof g.addEventListener === 'function') {
+    g.addEventListener('unhandledrejection', (e: any) => {
+      logger.error('Unhandled Promise Rejection', e?.reason ?? e);
+    });
+  }
+
+  // 3) Uncaught exceptions (defensive — jarang di RN tapi berguna).
+  const onException = (err: unknown) => {
+    logger.error('Uncaught Exception', err);
+  };
+  if (typeof proc.on === 'function') {
+    proc.on('uncaughtException', onException);
   }
 };
 
@@ -98,7 +124,6 @@ export const setupGlobalErrorHandler = () => {
  */
 export const logAppState = () => {
   if (__DEV__) {
-    // Use getState to read zustand outside React components
     const authState = useAuthStore.getState();
     logger.debug('Current App State', {
       isAuth: authState.isAuth,

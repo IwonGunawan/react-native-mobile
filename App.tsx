@@ -16,11 +16,17 @@ import OfflineIndicator from "./src/components/shared/OfflineIndicator";
 
 export default function App() {
   useEffect(() => {
-    // Setup debugging
+    // Always install global handlers — even in release, so we capture
+    // every error path including the persistence buffer.
+    setupGlobalErrorHandler();
+
     if (__DEV__) {
       logger.info("App started in development mode");
       setupAxiosInterceptors();
-      setupGlobalErrorHandler();
+
+      // Surface crashes from the previous session (force close) to logcat.
+      // Fire-and-forget; do not block UI.
+      void logger.dumpCrashBuffer();
 
       // Disable non-critical warnings
       LogBox.ignoreLogs([
