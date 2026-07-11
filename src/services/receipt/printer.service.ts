@@ -1,5 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { formatRupiah } from "../../utils";
+import { WaterUsagePrice } from "../payment.service";
 
 export interface PrinterDevice {
   device_name: string;
@@ -11,14 +12,14 @@ export interface ReceiptData {
   paidDate: string;
   prefix: string;
   customerName: string;
-  monthTotal: number;
   total: number;
-  textInfo: string;
-
-  // review
   cash: number;
   change: number;
-  savedAmount: number;
+  textInfo: string;
+  monthTotal: number;
+  monthList:    WaterUsagePrice[];
+  underpayment: WaterUsagePrice;
+  overpayment:  WaterUsagePrice;
 }
 
 let BLEPrinter: any;
@@ -115,9 +116,9 @@ const buildReceiptText = (data: ReceiptData): string => {
   ];
 
   // Tampilkan baris simpan hanya kalau ada
-  if (data.savedAmount > 0) {
-    lines.push(formatLine('Disimpan:', formatRupiah(data.savedAmount)));
-  }
+  // if (data.savedAmount > 0) {
+  //   lines.push(formatLine('Disimpan:', formatRupiah(data.savedAmount)));
+  // }
 
   lines.push(
     divider('='),

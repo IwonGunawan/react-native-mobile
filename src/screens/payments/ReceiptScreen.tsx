@@ -8,7 +8,7 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { paymentService, Receipt } from "../../services/payment.service";
 import { PaymentStackParams } from "../../navigation/stacks/PaymentStack";
 import { colors } from "../../theme";
-import { formatRupiah } from "../../utils";
+import { formatRupiah, MONTHS } from "../../utils";
 import { usePrinter } from "../../hooks/usePrinter";
 import { ReceiptData } from "../../services/receipt/printer.service";
 import PrinterSelectorModal from "../../components/shared/PrinterSelectorModal";
@@ -51,12 +51,14 @@ export default function ReceiptScreen() {
       customerName: customer.name,
       refNumber: detail.refNumber,
       paidDate: detail.paidDate,
-      monthTotal: detail.monthTotal,
       total: detail.total,
-      textInfo: detail.textInfo,
       cash: detail.cash,
       change: detail.change,
-      savedAmount: detail.savedAmount,
+      textInfo: detail.textInfo,
+      monthTotal: detail.monthTotal,
+      monthList: detail.monthList,
+      underpayment: detail.underpayment,
+      overpayment: detail.overpayment,
     };
   };
 
@@ -196,27 +198,34 @@ export default function ReceiptScreen() {
               value={`${detail.monthTotal} bulan`}
             />
 
-            <Text style={styles.receiptDivider}>{"─".repeat(36)}</Text>
+            {detail.monthList.length > 0 && (
+              <>
+                <Text style={styles.receiptDivider}>{"─".repeat(36)}</Text>
 
-            <ReceiptRow label="-Jan 2026" value="Rp50.000" />
-            <ReceiptRow label="-Feb 2026" value="Rp40.000" />
-            <ReceiptRow label="-Mar 2026" value="Rp30.000" />
-
-            <Text style={styles.receiptDivider}>{"─".repeat(36)}</Text>
-
-            <ReceiptRow
-              label="Tagihan"
-              value={formatRupiah(detail.total)}
-              bold
-            />
-            <ReceiptRow label="Tunai" value={formatRupiah(detail.cash)} />
-            <ReceiptRow label="Kembalian" value={formatRupiah(detail.change)} />
-            {detail.savedAmount > 0 && (
-              <ReceiptRow
-                label="Disimpan"
-                value={formatRupiah(detail.savedAmount)}
-              />
+                {detail.monthList.map((item) => {
+                  return (
+                    <ReceiptRow
+                      key={`${item.year}-${item.month}`}
+                      label={`${MONTHS[item.month]} ${item.year}`}
+                      value={formatRupiah(item.totalPrice)}
+                    />
+                  );
+                })}
+              </>
             )}
+
+            {Object.keys(detail.underpayment).length > 0 && (
+              <>
+                <Text style={styles.receiptDivider}>{"─".repeat(36)}</Text>
+                <ReceiptRow
+                  label={`Sisa tagihan bln ${MONTHS[detail.underpayment.month]} ${detail.underpayment.year}`}
+                  value={formatRupiah(detail.underpayment.totalPrice)}
+                />
+              </>
+            )}
+
+            <Text style={styles.receiptDivider}>{"─".repeat(36)}</Text>
+            <ReceiptRow label="Total" value={formatRupiah(detail.total)} bold />
 
             <Text style={styles.receiptDivider}>{"─".repeat(36)}</Text>
             <Text style={styles.receiptFooter}>{detail.textInfo}</Text>

@@ -29,7 +29,7 @@ export interface ListPayment {
 
 export interface Bill {
   customerId:     number,
-  waterUsages:    ListBill[],
+  waterUsages:    WaterUsagePrice[],
   underpayment:   number,
   overpayment:    number,
   billTotal:      number,
@@ -61,9 +61,11 @@ export interface Receipt {
   total:        number;
   cash:         number;
   change:       number;
-  monthTotal:   number;
-  savedAmount:  number;
   textInfo:     string;
+  monthTotal:   number;
+  monthList:    WaterUsagePrice[];
+  underpayment: WaterUsagePrice;
+  overpayment:  WaterUsagePrice;
 }
 
   export interface PaymentHistory {
@@ -80,7 +82,7 @@ export interface Receipt {
     status:     string;
   }
 
-interface ListBill {
+export interface WaterUsagePrice {
   waterUsageId:   number,
   month:          number,
   year:           number,

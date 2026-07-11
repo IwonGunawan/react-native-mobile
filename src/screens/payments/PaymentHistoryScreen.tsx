@@ -9,9 +9,6 @@ import { PaymentHistory, paymentService } from "../../services/payment.service";
 import { PaymentStackParams } from "../../navigation/stacks/PaymentStack";
 import { colors } from "../../theme";
 import { formatRupiah, STATUS_MAP } from "../../utils";
-import { usePrinter } from "../../hooks/usePrinter";
-import { ReceiptData } from "../../services/receipt/printer.service";
-import PrinterSelectorModal from "../../components/shared/PrinterSelectorModal";
 
 type Route = RouteProp<PaymentStackParams, "PaymentHistory">;
 type Navigation = NativeStackNavigationProp<
@@ -23,7 +20,6 @@ export default function PaymentHistoryScreen() {
   const navigation = useNavigation<Navigation>();
   const route = useRoute<Route>();
   const { customer } = route.params;
-  const printer = usePrinter();
 
   const [data, setData] = useState<PaymentHistory[]>([]);
   const [page, setPage] = useState(1);
@@ -32,34 +28,8 @@ export default function PaymentHistoryScreen() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [printingId, setPrintingId] = useState<number | null>(null);
 
   const hasMore = page < totalPages;
-
-  // Bangun ReceiptData dari history item + info customer
-  const buildReceiptData = (item: PaymentHistory): ReceiptData => ({
-    refNumber: item.refNumber || item.logUuid,
-    paidDate: item.createdAt,
-    prefix: customer.prefix,
-    customerName: customer.name,
-    monthTotal: item.monthTotal ?? 0,
-    total: item.total,
-    textInfo: item.textInfo || "Terima kasih atas pembayaran",
-    cash: item.cash,
-    change: item.change ?? Math.max(item.cash - item.total, 0),
-    savedAmount: item.savedAmount ?? 0,
-  });
-
-  // Handler print struk per item history
-  const handlePrint = async (item: PaymentHistory) => {
-    if (printingId !== null) return;
-    setPrintingId(item.id);
-    try {
-      await printer.print(buildReceiptData(item));
-    } finally {
-      setPrintingId(null);
-    }
-  };
 
   const fetchData = useCallback(
     async (pageNum = 1, isRefresh = false) => {
@@ -107,7 +77,6 @@ export default function PaymentHistoryScreen() {
 
   const renderItem = ({ item }: { item: PaymentHistory }) => {
     const paidDate = new Date(item.createdAt);
-    const isPrintingThis = printingId === item.id;
     const statusInfo = STATUS_MAP[item.status] ?? STATUS_MAP["1"];
 
     return (
@@ -156,9 +125,12 @@ export default function PaymentHistoryScreen() {
               icon="printer"
               size={20}
               iconColor={colors.primary}
-              loading={isPrintingThis}
-              disabled={printingId !== null}
-              onPress={() => handlePrint(item)}
+              onPress={() =>
+                navigation.navigate("Receipt", {
+                  customer,
+                  paymentId: item.id,
+                })
+              }
               style={styles.printBtn}
             />
           </View>
@@ -233,11 +205,6 @@ export default function PaymentHistoryScreen() {
           ) : null
         }
         contentContainerStyle={styles.list}
-      />
-      <PrinterSelectorModal
-        visible={printer.showSelector}
-        onSelect={printer.onPrinterSelected}
-        onClose={printer.closeSelector}
       />
     </SafeAreaView>
   );
