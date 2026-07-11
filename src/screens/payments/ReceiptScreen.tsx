@@ -86,7 +86,7 @@ export default function ReceiptScreen() {
   // Error state — tampilkan opsi retry / keluar
   if (error && !detail) {
     return (
-      <SafeAreaView style={styles.safe}>
+      <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
         <View style={styles.feedbackWrapper}>
           <MaterialCommunityIcons
             name="alert-circle-outline"
@@ -139,7 +139,7 @@ export default function ReceiptScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
       <PaymentStepHeader customer={customer} step="receipt" showBack={false} />
 
       <ScrollView
@@ -274,20 +274,20 @@ export default function ReceiptScreen() {
             disabled={printer.isPrinting}
             loading={printer.isPrinting}
             icon="printer"
-            style={[styles.actionBtn, { flex: 1 }]}
+            style={[styles.actionBtn, { flex: 0.6 }]}
             contentStyle={styles.actionBtnContent}
           >
-            Print
+            Cetak
           </Button>
           <Button
             mode="outlined"
             onPress={handleSharePdf}
             disabled={printer.isPrinting}
             icon="share-variant"
-            style={[styles.actionBtn, { flex: 1 }]}
+            style={[styles.actionBtn, { flex: 0.4 }]}
             contentStyle={styles.actionBtnContent}
           >
-            Share PDF
+            Share
           </Button>
         </View>
 

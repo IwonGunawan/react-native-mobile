@@ -69,7 +69,7 @@ export default function PaymentHistoryScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
       {/* Custom Header */}
       <View style={styles.header}>
         <IconButton icon="arrow-left" onPress={() => navigation.goBack()} />
@@ -120,7 +120,13 @@ export default function PaymentHistoryScreen() {
           ) : null
         }
         renderItem={({ item, index }) => (
-          <Card style={[styles.txCard, index === 0 && styles.txCardFirst]}>
+          <Card
+            style={[
+              styles.txCard,
+              index === 0 && styles.txCardFirst,
+              index === data.length - 1 && styles.txCardLast,
+            ]}
+          >
             <Card.Content style={styles.txContent}>
               <View style={styles.avatar}>
                 <Text style={styles.avatarText}>
@@ -225,6 +231,10 @@ const styles = StyleSheet.create({
   txCardFirst: {
     borderTopLeftRadius: 12,
     borderTopRightRadius: 12,
+  },
+  txCardLast: {
+    borderBottomLeftRadius: 12,
+    borderBottomRightRadius: 12,
   },
   txContent: {
     flexDirection: "row",

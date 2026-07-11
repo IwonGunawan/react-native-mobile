@@ -95,7 +95,7 @@ export default function PaymentHistoryScreen() {
               {formatRupiah(item.total)}
             </Text>
             <Text variant="bodySmall" style={styles.txMeta}>
-              Tunai {formatRupiah(item.cash)}
+              dibayar {formatRupiah(item.cash)}
             </Text>
             <Text variant="bodySmall" style={styles.txMeta}>
               {paidDate.toLocaleDateString("id-ID", {
@@ -122,7 +122,7 @@ export default function PaymentHistoryScreen() {
               </Text>
             </View>
             <IconButton
-              icon="printer"
+              icon="printer-eye"
               size={20}
               iconColor={colors.primary}
               onPress={() =>
@@ -148,7 +148,7 @@ export default function PaymentHistoryScreen() {
             Semua Transaksi
           </Text>
           <Text variant="bodySmall" style={styles.headerSub}>
-            {customer.name}
+            {customer.prefix} {customer.name}
           </Text>
         </View>
       </View>

@@ -1,4 +1,5 @@
 import { Modal, ScrollView, StyleSheet, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { VillageStat } from "../../hooks/useHomeData";
 import { colors } from "../../theme";
 import { Button, ProgressBar, Text } from "react-native-paper";
@@ -15,6 +16,7 @@ export default function VillageProgressModal({
   stats,
   onClose,
 }: Props) {
+  const insets = useSafeAreaInsets();
   const totalAll = stats.reduce((s, v) => s + v.totalCustomers, 0);
   const checkedAll = stats.reduce((s, v) => s + v.checkedCount, 0);
 
@@ -26,7 +28,7 @@ export default function VillageProgressModal({
       onRequestClose={onClose}
     >
       <View style={styles.overlay}>
-        <View style={styles.sheet}>
+        <View style={[styles.sheet, { paddingBottom: 24 + insets.bottom }]}>
           {/* Handle Bar */}
           <View style={styles.handle} />
           <Text variant="titleMedium" style={styles.title}>
@@ -58,7 +60,9 @@ export default function VillageProgressModal({
 
                 {/* Progress Bar */}
                 <ProgressBar
-                  progress={s.totalCustomers > 0 ? s.checkedCount / s.totalCustomers : 0}
+                  progress={
+                    s.totalCustomers > 0 ? s.checkedCount / s.totalCustomers : 0
+                  }
                   color={
                     s.percent === 100
                       ? colors.success
@@ -110,6 +114,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     padding: 24,
+    paddingBottom: 24,
     maxHeight: "80%",
   },
   handle: {

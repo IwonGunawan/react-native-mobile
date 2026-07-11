@@ -49,7 +49,7 @@ export default function BillScreen() {
 
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.safe}>
+      <SafeAreaView style={styles.safe} edges={["left", "top", "right"]}>
         <View style={styles.loadingWrapper}>
           <MaterialCommunityIcons
             name="loading"
@@ -65,7 +65,7 @@ export default function BillScreen() {
   }
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={styles.safe} edges={["left", "top", "right"]}>
       <PaymentStepHeader
         customer={customer}
         step="bill"
@@ -190,7 +190,7 @@ export default function BillScreen() {
                         variant="bodySmall"
                         style={{ color: colors.success, fontWeight: "600" }}
                       >
-                        - {formatRupiah(bill.overpayment)}
+                        {formatRupiah(bill.overpayment)}
                       </Text>
                     </View>
                   </>
@@ -206,7 +206,7 @@ export default function BillScreen() {
                     variant="bodyMedium"
                     style={[styles.detailValue, { color: colors.primary }]}
                   >
-                    {formatRupiah(bill.finalTotal)}
+                    {bill.billTotal > 0 ? formatRupiah(bill.finalTotal) : 0}
                   </Text>
                 </View>
               </Card.Content>

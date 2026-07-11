@@ -307,6 +307,8 @@ export default function InputMeterScreen() {
                               loading={isReplacing === h.id}
                               disabled={isReplacing !== null}
                               labelStyle={styles.replaceLabel}
+                              style={styles.replaceBtn}
+                              contentStyle={styles.replaceBtnContent}
                             >
                               Ganti Meter
                             </Button>
@@ -471,6 +473,16 @@ const styles = StyleSheet.create({
   },
   statusText: { fontSize: 11, fontWeight: "600" },
   replaceLabel: { fontSize: 11, color: colors.warning },
+  replaceBtn: {
+    alignSelf: "flex-start",
+    borderColor: colors.warning,
+    borderRadius: 8,
+    minHeight: 32,
+  },
+  replaceBtnContent: {
+    paddingHorizontal: 10,
+    paddingVertical: 2,
+  },
 
   // Empty
   emptyCard: { borderRadius: 12 },

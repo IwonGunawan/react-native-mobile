@@ -146,7 +146,7 @@ export default function WaterUsageScreen() {
       {/* Search Bar */}
       <View style={styles.searchWrapper}>
         <Searchbar
-          placeholder="Cari nama atau kode"
+          placeholder="Cari nama atau kode..."
           value={searchText}
           onChangeText={setSearchText}
           style={styles.searchBar}

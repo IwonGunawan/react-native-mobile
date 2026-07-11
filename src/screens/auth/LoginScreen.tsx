@@ -136,7 +136,7 @@ export default function LoginScreen() {
 
             {/* FOOTER */}
             <Text variant="bodySmall" style={styles.footer}>
-              Cikaret Setra © 2026
+              Cikaret Setra © 2026 v2.0
             </Text>
           </ScrollView>
         </KeyboardAvoidingView>

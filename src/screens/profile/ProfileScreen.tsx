@@ -75,7 +75,7 @@ export default function ProfileScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={styles.safe} edges={["left", "top", "right"]}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <KeyboardAvoidingView
           style={styles.flex}
@@ -278,7 +278,7 @@ export default function ProfileScreen() {
                   label="Android"
                   value={Device.osVersion ?? "-"}
                 />
-                <InfoRow icon="application" label="Versi App" value="1.0.0" />
+                <InfoRow icon="application" label="Versi App" value="2.0.0" />
               </Card.Content>
             </Card>
 

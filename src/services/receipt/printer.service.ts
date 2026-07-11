@@ -111,12 +111,12 @@ const buildReceiptText = (data: ReceiptData): string => {
     centerText('STRUK PEMBAYARAN AIR'),
     centerText('CIKARET SETRA'),
     divider('='),
-    formatLine('No.Ref:', data.refNumber.slice(0, 8).toUpperCase()),
-    formatLine('Kode.Pel:', `${data.customerCode}`),
-    formatLine('Nama:', `${data.prefix} ${data.customerName}`.slice(0, 18)),
-    formatLine('Tgl Bayar:', dateStr),
-    formatLine('Jam:', timeStr),
-    formatLine('Jml Bulan:', `${data.monthTotal} bulan`),
+    formatLine('No.Ref', data.refNumber.slice(0, 8).toUpperCase()),
+    formatLine('Kode.Pel', `${data.customerCode}`),
+    formatLine('Nama', `${data.prefix} ${data.customerName}`.slice(0, 18)),
+    formatLine('Tgl Bayar', dateStr),
+    formatLine('Jam', timeStr),
+    formatLine('Jml Bulan', `${data.monthTotal} bulan`),
     divider('-'),
   ];
 
@@ -140,7 +140,7 @@ const buildReceiptText = (data: ReceiptData): string => {
 
   lines.push(
     divider('-'),
-    formatLine('Total:', formatRupiah(data.total)),
+    formatLine('Total', formatRupiah(data.total)),
     formatLine('Bayar', formatRupiah(data.cash))
   );
 
