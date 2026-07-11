@@ -1,7 +1,8 @@
 import * as Print   from 'expo-print';
 import * as Sharing from 'expo-sharing';
 import { ReceiptData } from './printer.service';
-import { formatRupiah } from '../../utils';
+import { formatRupiah, MONTHS } from '../../utils';
+import { WaterUsagePrice } from '../payment.service';
 
 // Render struk sebagai HTML → convert ke PDF → share
 const shareReceiptAsPdf = async (data: ReceiptData): Promise<void> => {
@@ -12,6 +13,10 @@ const shareReceiptAsPdf = async (data: ReceiptData): Promise<void> => {
   const timeStr  = paidDate.toLocaleTimeString('id-ID', {
     hour: '2-digit', minute: '2-digit',
   });
+
+  const waterUsageList = data.monthList ?? [];
+  const hasUnderpayment = data.underpayment && Object.keys(data.underpayment).length > 0;
+  const hasOverpayment = data.overpayment && Object.keys(data.overpayment).length > 0;
 
   const html = `
     <!DOCTYPE html>
@@ -51,7 +56,11 @@ const shareReceiptAsPdf = async (data: ReceiptData): Promise<void> => {
         <span>${data.refNumber.slice(0, 8).toUpperCase()}</span>
       </div>
       <div class="row">
-        <span>Pelanggan</span>
+        <span>Kode.Pel</span>
+        <span>${data.customerCode}</span>
+      </div>
+      <div class="row">
+        <span>Nama</span>
         <span>${data.prefix} ${data.customerName}</span>
       </div>
       <div class="row">
@@ -69,17 +78,38 @@ const shareReceiptAsPdf = async (data: ReceiptData): Promise<void> => {
 
       <div class="divider"></div>
 
+      ${waterUsageList.map((item: WaterUsagePrice) => {
+        return `
+          <div class="row">
+            <span>${MONTHS[item.month]} ${item.year}</span>
+            <span>${formatRupiah(item.totalPrice)}</span>
+          </div>
+        `;
+      }).join('')}
+
+      ${hasUnderpayment ? `
+        <div class="row">
+          <span>Kurang bayar bln ${MONTHS[data.underpayment.month]} ${data.underpayment.year}</span>
+          <span>${formatRupiah(data.underpayment.totalPrice)}</span>
+        </div>
+      ` : ''}
+
+      ${hasOverpayment ? `
+        <div class="row">
+          <span>Lebih bayar bln ${MONTHS[data.overpayment.month]} ${data.overpayment.year}</span>
+          <span>${formatRupiah(data.overpayment.totalPrice)}</span>
+        </div>
+      ` : ''}
+
+      <div class="divider"></div>
+
       <div class="row">
-        <span>Tagihan</span>
+        <span>Total</span>
         <span>${formatRupiah(data.total)}</span>
       </div>
       <div class="row">
-        <span>Tunai</span>
+        <span>Bayar</span>
         <span>${formatRupiah(data.cash)}</span>
-      </div>
-      <div class="row bold">
-        <span>Kembalian</span>
-        <span>${formatRupiah(data.change)}</span>
       </div>
 
       <div class="divider"></div>

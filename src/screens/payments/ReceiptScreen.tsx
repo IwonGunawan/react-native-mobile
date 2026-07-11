@@ -49,6 +49,7 @@ export default function ReceiptScreen() {
     return {
       prefix: customer.prefix,
       customerName: customer.name,
+      customerCode: customer.code,
       refNumber: detail.refNumber,
       paidDate: detail.paidDate,
       total: detail.total,
@@ -167,7 +168,7 @@ export default function ReceiptScreen() {
           <Card.Content>
             <Text style={styles.receiptHeader}>STRUK PEMBAYARAN AIR</Text>
             <Text style={styles.receiptSubHeader}>CIKARET SETRA</Text>
-            <Text style={styles.receiptDivider}>{"─".repeat(36)}</Text>
+            <View style={styles.receiptDivider} />
 
             <ReceiptRow
               label="No. Ref"
@@ -200,7 +201,7 @@ export default function ReceiptScreen() {
 
             {detail.monthList.length > 0 && (
               <>
-                <Text style={styles.receiptDivider}>{"─".repeat(36)}</Text>
+                <View style={styles.receiptDivider} />
 
                 {detail.monthList.map((item) => {
                   return (
@@ -216,18 +217,29 @@ export default function ReceiptScreen() {
 
             {Object.keys(detail.underpayment).length > 0 && (
               <>
-                <Text style={styles.receiptDivider}>{"─".repeat(36)}</Text>
+                <View style={styles.receiptDivider} />
                 <ReceiptRow
-                  label={`Sisa tagihan bln ${MONTHS[detail.underpayment.month]} ${detail.underpayment.year}`}
+                  label={`Kurang bayar bln ${MONTHS[detail.underpayment.month]} ${detail.underpayment.year}`}
                   value={formatRupiah(detail.underpayment.totalPrice)}
                 />
               </>
             )}
 
-            <Text style={styles.receiptDivider}>{"─".repeat(36)}</Text>
-            <ReceiptRow label="Total" value={formatRupiah(detail.total)} bold />
+            {Object.keys(detail.overpayment).length > 0 && (
+              <>
+                <View style={styles.receiptDivider} />
+                <ReceiptRow
+                  label={`Lebih bayar bln ${MONTHS[detail.overpayment.month]} ${detail.overpayment.year}`}
+                  value={formatRupiah(detail.overpayment.totalPrice)}
+                />
+              </>
+            )}
 
-            <Text style={styles.receiptDivider}>{"─".repeat(36)}</Text>
+            <View style={styles.receiptDivider} />
+            <ReceiptRow label="Total" value={formatRupiah(detail.total)} bold />
+            <ReceiptRow label="Bayar" value={formatRupiah(detail.cash)} bold />
+
+            <View style={styles.receiptDivider} />
             <Text style={styles.receiptFooter}>{detail.textInfo}</Text>
           </Card.Content>
         </Card>
@@ -412,10 +424,10 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   receiptDivider: {
-    fontFamily: "monospace",
-    fontSize: 11,
-    color: "#ccc",
-    marginVertical: 8,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: "#bbb",
+    borderStyle: "dashed",
+    marginVertical: 10,
   },
   receiptFooter: {
     fontFamily: "monospace",

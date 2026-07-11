@@ -1,5 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { formatRupiah } from "../../utils";
+import { formatRupiah, MONTHS } from "../../utils";
 import { WaterUsagePrice } from "../payment.service";
 
 export interface PrinterDevice {
@@ -8,10 +8,11 @@ export interface PrinterDevice {
 }
 
 export interface ReceiptData {
-  refNumber: string;
-  paidDate: string;
   prefix: string;
   customerName: string;
+  customerCode: string;
+  refNumber: string;
+  paidDate: string;
   total: number;
   cash: number;
   change: number;
@@ -102,18 +103,46 @@ const buildReceiptText = (data: ReceiptData): string => {
     hour: '2-digit', minute: '2-digit',
   });
 
+  const monthList = data.monthList ?? [];
+  const hasUnderpayment = data.underpayment && Object.keys(data.underpayment).length > 0;
+  const hasOverpayment = data.overpayment && Object.keys(data.overpayment).length > 0;
+
   const lines: string[] = [
     centerText('STRUK PEMBAYARAN AIR'),
     centerText('CIKARET SETRA'),
     divider('='),
     formatLine('No.Ref:', data.refNumber.slice(0, 8).toUpperCase()),
+    formatLine('Kode.Pel:', `${data.customerCode}`),
     formatLine('Nama:', `${data.prefix} ${data.customerName}`.slice(0, 18)),
     formatLine('Tgl Bayar:', dateStr),
     formatLine('Jam:', timeStr),
     formatLine('Jml Bulan:', `${data.monthTotal} bulan`),
     divider('-'),
-    formatLine('Tagihan:', formatRupiah(data.total)),
   ];
+
+  monthList.forEach((item) => {
+    lines.push(
+      formatLine(`${MONTHS[item.month]} ${item.year}`, formatRupiah(item.totalPrice)),
+    );
+  });
+
+  if (hasUnderpayment) {
+    lines.push(
+      formatLine(`Kurang bayar bln ${MONTHS[data.underpayment.month]} ${data.underpayment.year}`, formatRupiah(data.underpayment.totalPrice)),
+    );
+  }
+
+  if (hasOverpayment) {
+    lines.push(
+      formatLine(`Lebih bayar bln ${MONTHS[data.overpayment.month]} ${data.overpayment.year}`, formatRupiah(data.overpayment.totalPrice)),
+    );
+  }
+
+  lines.push(
+    divider('-'),
+    formatLine('Total:', formatRupiah(data.total)),
+    formatLine('Bayar', formatRupiah(data.cash))
+  );
 
   // Tampilkan baris simpan hanya kalau ada
   // if (data.savedAmount > 0) {
@@ -147,7 +176,7 @@ const printReceipt = async (
     const text = buildReceiptText(data);
     await BLEPrinter.printBill(text);
   } catch (error) {
-    console.log('Error printReceipt', error)
+    console.log('Error printReceipt:', error)
   }
 };
 
