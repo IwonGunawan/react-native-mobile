@@ -2,10 +2,10 @@ import axios from 'axios'
 import { useAuthStore } from '../stores/auth.store'
 import { logger } from '../utils/debug'
 
+const DEFAULT_BASE_URL = 'http://10.0.2.2:3100'
+
 const api = axios.create({
-  baseURL: __DEV__
-    ? process.env.EXPO_PUBLIC_API_URL_DEV
-    : process.env.EXPO_PUBLIC_API_URL,
+  baseURL: process.env.EXPO_PUBLIC_API_URL ?? DEFAULT_BASE_URL,
   headers: { 'Content-Type': 'application/json' },
   timeout: 10000,
 })
