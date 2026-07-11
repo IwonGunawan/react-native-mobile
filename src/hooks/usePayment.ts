@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Payment, paymentService } from "../services/payment.service";
+import { ListPayment, paymentService } from "../services/payment.service";
 
 
 interface Query {
@@ -12,7 +12,7 @@ interface Query {
 }
 
 export function usePaymentList(queryInit?: Query) {
-  const [data, setData] = useState<Payment[]>([]);
+  const [data, setData] = useState<ListPayment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [isLoadingMore, setIsLoadingMore] = useState(false);

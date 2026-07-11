@@ -17,7 +17,7 @@ export interface RecentPayment {
 
 /** PAYMENTS Menu */
 
-export interface Payment {
+export interface ListPayment {
   customerId:     number,
   code:           string,
   name:           string,
@@ -43,13 +43,26 @@ export interface CreatePayment {
   saveChange:     number,
 }
 
-export interface PaymentReceipt {
+export interface CreatePaymentResp {
+  paymentId:    number;
   refNumber:    string;
   paidDate:     string;
   total:        number;
   cash:         number;
   change:       number;
   monthTotal:   number;
+  textInfo:     string;
+}
+
+export interface Receipt {
+  paymentId:    number;
+  refNumber:    string;
+  paidDate:     string;
+  total:        number;
+  cash:         number;
+  change:       number;
+  monthTotal:   number;
+  savedAmount:  number;
   textInfo:     string;
 }
 
@@ -95,7 +108,7 @@ export const paymentService = {
   /** PAYMENT MENU */
   // list payment 
   getAll: (params?: WaterUsageQuery) => {
-    return api.get<PaginatedResponse<Payment>>('/payments', { params })
+    return api.get<PaginatedResponse<ListPayment>>('/payments', { params })
     .then(r => r.data)
   },
 
@@ -107,13 +120,19 @@ export const paymentService = {
 
   // create payment
   create: (payload: CreatePayment) => {
-    return api.post<PaymentReceipt>('/payments', payload)
+    return api.post<CreatePaymentResp>('/payments', payload)
     .then(r => r.data);
   },
 
   // histories payment
   histories: (customerId: number, params?: {page: number, limit: number}) => {
-    return api.get<PaginatedResponse<PaymentHistory>>(`/payments/customer/${customerId}`, {params})
+    return api.get<PaginatedResponse<PaymentHistory>>(`/payments/histories/${customerId}`, {params})
+    .then(r => r.data);
+  },
+
+  // get receipt detail by payment id
+  getReceipt: (paymentId: number) => {
+    return api.get<Receipt>(`/payments/receipts/${paymentId}`)
     .then(r => r.data);
   }
   /** END Payment Menu */

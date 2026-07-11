@@ -4,17 +4,13 @@ import BillScreen from "../../screens/payments/BillScreen";
 import PayScreen from "../../screens/payments/PayScreen";
 import ReceiptScreen from "../../screens/payments/ReceiptScreen";
 import PaymentHistoryScreen from "../../screens/payments/PaymentHistoryScreen";
-import {
-  Bill,
-  Payment as Customer,
-  PaymentReceipt,
-} from "../../services/payment.service";
+import { Bill, ListPayment as Customer } from "../../services/payment.service";
 
 export type PaymentStackParams = {
   PaymentList: undefined;
   Bill: { customer: Customer };
   Pay: { customer: Customer; bill: Bill };
-  Receipt: { customer: Customer; receipt: PaymentReceipt; savedAmount: number };
+  Receipt: { customer: Customer; paymentId: number };
   PaymentHistory: { customer: Customer };
 };
 

@@ -15,7 +15,7 @@ import { villageService } from "../../services/village.service";
 import { PaymentStackParams } from "../../navigation/stacks/PaymentStack";
 import { colors } from "../../theme";
 import { usePaymentList } from "../../hooks/usePayment";
-import { Payment } from "../../services/payment.service";
+import { ListPayment } from "../../services/payment.service";
 import { formatRupiah } from "../../utils";
 
 type Nav = NativeStackNavigationProp<PaymentStackParams, "PaymentList">;
@@ -63,7 +63,7 @@ export default function PaymentsScreen() {
     }
   }, [isFocused]);
 
-  const renderItem = ({ item }: { item: Payment }) => {
+  const renderItem = ({ item }: { item: ListPayment }) => {
     return (
       <TouchableOpacity
         onPress={() => navigation.navigate("Bill", { customer: item })}

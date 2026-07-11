@@ -2,12 +2,12 @@ import { View, StyleSheet } from "react-native";
 import { Button, Text } from "react-native-paper";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { colors } from "../../theme";
-import { Payment } from "../../services/payment.service";
+import { ListPayment } from "../../services/payment.service";
 
 export type PaymentStep = "bill" | "pay" | "receipt";
 
 type Props = {
-  customer: Payment;
+  customer: ListPayment;
   step: PaymentStep;
   onBack?: () => void;
   backLabel?: string;
@@ -123,7 +123,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-  },  stepItem: {
+  },
+  stepItem: {
     flexDirection: "row",
     alignItems: "center",
     gap: 6,

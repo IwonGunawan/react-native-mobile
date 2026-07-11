@@ -1,9 +1,11 @@
+import { useCallback, useEffect, useState } from "react";
 import { View, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 import { Text, Button, Card, ActivityIndicator } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import { paymentService, Receipt } from "../../services/payment.service";
 import { PaymentStackParams } from "../../navigation/stacks/PaymentStack";
 import { colors } from "../../theme";
 import { formatRupiah } from "../../utils";
@@ -18,21 +20,45 @@ type Navigation = NativeStackNavigationProp<PaymentStackParams, "Receipt">;
 export default function ReceiptScreen() {
   const navigation = useNavigation<Navigation>();
   const route = useRoute<Route>();
-  const { customer, receipt, savedAmount } = route.params;
+  const { customer, paymentId } = route.params;
   const printer = usePrinter();
 
-  const buildReceiptData = (): ReceiptData | null => ({
-    prefix: customer.prefix,
-    customerName: customer.name,
-    refNumber: receipt.refNumber,
-    paidDate: receipt.paidDate,
-    monthTotal: receipt.monthTotal,
-    total: receipt.total,
-    textInfo: receipt.textInfo,
-    cash: receipt.cash,
-    change: receipt.change,
-    savedAmount,
-  });
+  const [detail, setDetail] = useState<Receipt | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchDetail = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const data = await paymentService.getReceipt(paymentId);
+      setDetail(data);
+    } catch (err: any) {
+      setError(err.response?.data?.message ?? "Gagal memuat struk");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [paymentId]);
+
+  useEffect(() => {
+    fetchDetail();
+  }, [fetchDetail]);
+
+  const buildReceiptData = (): ReceiptData | null => {
+    if (!detail) return null;
+    return {
+      prefix: customer.prefix,
+      customerName: customer.name,
+      refNumber: detail.refNumber,
+      paidDate: detail.paidDate,
+      monthTotal: detail.monthTotal,
+      total: detail.total,
+      textInfo: detail.textInfo,
+      cash: detail.cash,
+      change: detail.change,
+      savedAmount: detail.savedAmount,
+    };
+  };
 
   const handlePrint = async () => {
     const data = buildReceiptData();
@@ -49,6 +75,65 @@ export default function ReceiptScreen() {
   const handleDone = () => {
     navigation.popToTop();
   };
+
+  const handleRetry = () => {
+    fetchDetail();
+  };
+
+  // Error state — tampilkan opsi retry / keluar
+  if (error && !detail) {
+    return (
+      <SafeAreaView style={styles.safe}>
+        <View style={styles.feedbackWrapper}>
+          <MaterialCommunityIcons
+            name="alert-circle-outline"
+            size={56}
+            color={colors.danger}
+          />
+          <Text variant="titleMedium" style={styles.feedbackTitle}>
+            Tidak dapat memuat struk
+          </Text>
+          <Text variant="bodySmall" style={styles.feedbackSub}>
+            {error}
+          </Text>
+          <View style={styles.feedbackActions}>
+            <Button
+              mode="contained"
+              onPress={handleRetry}
+              style={styles.actionBtn}
+              contentStyle={styles.actionBtnContent}
+              icon="refresh"
+            >
+              Coba Lagi
+            </Button>
+            <Button
+              mode="outlined"
+              onPress={handleDone}
+              style={styles.actionBtn}
+              contentStyle={styles.actionBtnContent}
+              icon="home"
+            >
+              Kembali ke Home
+            </Button>
+          </View>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // Loading state
+  if (isLoading || !detail) {
+    return (
+      <SafeAreaView style={styles.safe}>
+        <View style={styles.feedbackWrapper}>
+          <ActivityIndicator size="large" color={colors.primary} />
+          <Text variant="bodyMedium" style={styles.feedbackSub}>
+            Memuat struk...
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safe}>
@@ -71,7 +156,7 @@ export default function ReceiptScreen() {
             Pembayaran Berhasil
           </Text>
           <Text variant="bodyMedium" style={styles.successSub}>
-            {receipt.textInfo}
+            {detail.textInfo}
           </Text>
         </View>
 
@@ -84,7 +169,7 @@ export default function ReceiptScreen() {
 
             <ReceiptRow
               label="No. Ref"
-              value={receipt.refNumber.slice(0, 8).toUpperCase()}
+              value={detail.refNumber.slice(0, 8).toUpperCase()}
             />
             <ReceiptRow label="Kode. Pel" value={customer.code} />
             <ReceiptRow
@@ -93,7 +178,7 @@ export default function ReceiptScreen() {
             />
             <ReceiptRow
               label="Tgl Bayar"
-              value={new Date(receipt.paidDate).toLocaleDateString("id-ID", {
+              value={new Date(detail.paidDate).toLocaleDateString("id-ID", {
                 day: "2-digit",
                 month: "short",
                 year: "numeric",
@@ -101,14 +186,14 @@ export default function ReceiptScreen() {
             />
             <ReceiptRow
               label="Jam"
-              value={new Date(receipt.paidDate).toLocaleTimeString("id-ID", {
+              value={new Date(detail.paidDate).toLocaleTimeString("id-ID", {
                 hour: "2-digit",
                 minute: "2-digit",
               })}
             />
             <ReceiptRow
               label="Jml Bulan"
-              value={`${receipt.monthTotal} bulan`}
+              value={`${detail.monthTotal} bulan`}
             />
 
             <Text style={styles.receiptDivider}>{"─".repeat(36)}</Text>
@@ -121,22 +206,32 @@ export default function ReceiptScreen() {
 
             <ReceiptRow
               label="Tagihan"
-              value={formatRupiah(receipt.total)}
+              value={formatRupiah(detail.total)}
               bold
             />
-            <ReceiptRow label="Tunai" value={formatRupiah(receipt.cash)} />
-            <ReceiptRow
-              label="Kembalian"
-              value={formatRupiah(receipt.change)}
-            />
-            {savedAmount > 0 && (
-              <ReceiptRow label="Disimpan" value={formatRupiah(savedAmount)} />
+            <ReceiptRow label="Tunai" value={formatRupiah(detail.cash)} />
+            <ReceiptRow label="Kembalian" value={formatRupiah(detail.change)} />
+            {detail.savedAmount > 0 && (
+              <ReceiptRow
+                label="Disimpan"
+                value={formatRupiah(detail.savedAmount)}
+              />
             )}
 
             <Text style={styles.receiptDivider}>{"─".repeat(36)}</Text>
-            <Text style={styles.receiptFooter}>{receipt.textInfo}</Text>
+            <Text style={styles.receiptFooter}>{detail.textInfo}</Text>
           </Card.Content>
         </Card>
+
+        {/* Inline error banner kalau gagal refresh setelah sempat load */}
+        {error && (
+          <View style={styles.inlineErrorBox}>
+            <Text style={styles.errorText}>{error}</Text>
+            <Button compact mode="text" onPress={handleRetry} icon="refresh">
+              Coba Lagi
+            </Button>
+          </View>
+        )}
 
         {/* Print status */}
         {printer.isPrinting && (
@@ -247,6 +342,30 @@ const receiptStyles = StyleSheet.create({
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: colors.background },
   scroll: { padding: 16, paddingBottom: 32 },
+  feedbackWrapper: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 24,
+    gap: 12,
+  },
+  feedbackTitle: {
+    fontWeight: "700",
+    color: colors.textPrimary,
+    textAlign: "center",
+    marginTop: 8,
+  },
+  feedbackSub: {
+    color: colors.textSecondary,
+    textAlign: "center",
+  },
+  feedbackActions: {
+    flexDirection: "row",
+    gap: 10,
+    marginTop: 16,
+    flexWrap: "wrap",
+    justifyContent: "center",
+  },
   successWrapper: {
     alignItems: "center",
     paddingVertical: 24,
@@ -296,6 +415,17 @@ const styles = StyleSheet.create({
     color: "#555",
     marginTop: 4,
   },
+  inlineErrorBox: {
+    backgroundColor: colors.danger + "15",
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    gap: 8,
+  },
+  errorText: { color: colors.danger, fontSize: 13, flex: 1 },
   printStatus: {
     flexDirection: "row",
     alignItems: "center",

@@ -60,8 +60,7 @@ export default function PayScreen() {
             });
             navigation.replace("Receipt", {
               customer,
-              receipt,
-              savedAmount: savedRupiah,
+              paymentId: receipt.paymentId,
             });
           } catch (err: any) {
             setError(err.response?.data?.message ?? "Pembayaran gagal");
