@@ -84,9 +84,18 @@ export default function ProfileScreen() {
           <ScrollView contentContainerStyle={styles.scroll}>
             {/* Header */}
             <View style={styles.header}>
-              <Text variant="titleLarge" style={styles.headerTitle}>
-                Profil
-              </Text>
+              <View style={styles.headerContent}>
+                <Text variant="titleLarge" style={styles.headerTitle}>
+                  Profil
+                </Text>
+                <View style={styles.headerIconBadge}>
+                  <MaterialCommunityIcons
+                    name="account-circle-outline"
+                    size={20}
+                    color={colors.primary}
+                  />
+                </View>
+              </View>
             </View>
 
             {/* Account Card */}
@@ -345,7 +354,20 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 16,
   },
+  headerContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
   headerTitle: { fontWeight: "700", color: colors.textPrimary },
+  headerIconBadge: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.primaryLight + "20",
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
   card: {
     marginHorizontal: 16,

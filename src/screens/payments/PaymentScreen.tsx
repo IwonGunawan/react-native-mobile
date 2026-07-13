@@ -114,13 +114,22 @@ export default function PaymentsScreen() {
     <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
       {/* Header */}
       <View style={styles.header}>
-        <View>
-          <Text variant="titleLarge" style={styles.headerTitle}>
-            Bayar Air
-          </Text>
-          <Text variant="bodySmall" style={styles.headerSub}>
-            {totalData} customers
-          </Text>
+        <View style={styles.headerContent}>
+          <View>
+            <Text variant="titleLarge" style={styles.headerTitle}>
+              Bayar Air
+            </Text>
+            <Text variant="bodySmall" style={styles.headerSub}>
+              {totalData} customers
+            </Text>
+          </View>
+          <View style={styles.headerIconBadge}>
+            <MaterialCommunityIcons
+              name="water-outline"
+              size={18}
+              color={colors.primary}
+            />
+          </View>
         </View>
       </View>
 
@@ -221,8 +230,21 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 12,
   },
+  headerContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
   headerTitle: { fontWeight: "700", color: colors.textPrimary },
   headerSub: { color: colors.textSecondary, marginTop: 2 },
+  headerIconBadge: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: colors.primaryLight + "20",
+    alignItems: "center",
+    justifyContent: "center",
+  },
 
   searchWrapper: { paddingHorizontal: 16, marginBottom: 8 },
   searchbar: {

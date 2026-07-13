@@ -49,9 +49,16 @@ export default function HomeScreen() {
           <View>
             {/* ── Greeting ── */}
             <View style={styles.greeting}>
-              <Text variant="bodyLarge" style={styles.greetText}>
-                Selamat bekerja,
-              </Text>
+              <View style={styles.greetingBadge}>
+                <MaterialCommunityIcons
+                  name="water-outline"
+                  size={18}
+                  color={colors.primary}
+                />
+                <Text variant="bodySmall" style={styles.greetText}>
+                  Selamat bekerja
+                </Text>
+              </View>
               <Text variant="headlineMedium" style={styles.nameText}>
                 {user?.name}
               </Text>
@@ -339,8 +346,19 @@ const styles = StyleSheet.create({
     paddingTop: 20,
     paddingBottom: 16,
   },
-  greetText: { color: colors.textSecondary },
-  nameText: { color: colors.primary, fontWeight: "700" },
+  greetingBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    alignSelf: "flex-start",
+    gap: 6,
+    backgroundColor: colors.primaryLight + "20",
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    marginBottom: 6,
+  },
+  greetText: { color: colors.primary, fontWeight: "600" },
+  nameText: { color: colors.textPrimary, fontWeight: "700" },
 
   // Payment stats
   statsRow: {

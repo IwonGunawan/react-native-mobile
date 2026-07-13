@@ -136,7 +136,7 @@ export default function LoginScreen() {
 
             {/* FOOTER */}
             <Text variant="bodySmall" style={styles.footer}>
-              Cikaret Setra © 2026 v2.0
+              Cikaret Setra v2.0 © 2026
             </Text>
           </ScrollView>
         </KeyboardAvoidingView>
@@ -165,16 +165,23 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   iconWrapper: {
-    width: 72,
-    height: 72,
-    borderRadius: 36,
-    backgroundColor: "rgba(255,255,255,0.2)",
+    width: 86,
+    height: 86,
+    borderRadius: 43,
+    backgroundColor: "rgba(255,255,255,0.95)",
     justifyContent: "center",
     alignItems: "center",
     marginBottom: 16,
+    borderWidth: 3,
+    borderColor: "rgba(255,255,255,0.9)",
+    shadowColor: "#0f6b85",
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 6,
   },
   iconText: {
-    fontSize: 36,
+    fontSize: 42,
   },
   title: {
     color: "#fff",
@@ -182,15 +189,21 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   subtitle: {
-    color: "rgba(255,255,255,0.75)",
+    color: "rgba(255,255,255,0.8)",
   },
 
   // CARD
   card: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.card,
     borderRadius: 16,
     padding: 24,
-    elevation: 4, // shadow on android
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: colors.border,
+    shadowColor: colors.primaryDark,
+    shadowOpacity: 0.12,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
   },
   cardTitle: {
     fontWeight: "600",
@@ -200,7 +213,7 @@ const styles = StyleSheet.create({
 
   // ERROR
   errorBox: {
-    backgroundColor: "#fce4ec",
+    backgroundColor: "#eef9fc",
     borderRadius: 8,
     padding: 12,
     marginBottom: 12,
@@ -213,13 +226,14 @@ const styles = StyleSheet.create({
   // INPUT
   input: {
     marginBottom: 12,
-    backgroundColor: "#fff",
+    backgroundColor: colors.card,
   },
 
   // BUTTON
   button: {
     marginTop: 8,
     borderRadius: 8,
+    backgroundColor: colors.primary,
   },
   buttonContent: {
     paddingVertical: 6,
@@ -232,7 +246,7 @@ const styles = StyleSheet.create({
   // FOOTER
   footer: {
     textAlign: "center",
-    color: "rgba(255,255,255,0.6)",
+    color: "rgba(255,255,255,0.72)",
     marginTop: 32,
   },
 });

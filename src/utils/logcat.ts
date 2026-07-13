@@ -127,6 +127,7 @@ export const logger = {
     const entries = await logger.readCrashBuffer();
     console.log(`[CRASH-DUMP] ${entries.length} buffered entries`);
     for (const e of entries) {
+      if(e.ts == undefined) continue;
       console.log(
         `[CRASH-DUMP] ${e.ts} [${LEVEL_TAG[e.level]}] ${e.msg}`,
         e.data,
