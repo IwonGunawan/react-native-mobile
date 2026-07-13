@@ -1,12 +1,13 @@
-import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View, LogBox } from "react-native";
+import { LogBox } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { PaperProvider } from "react-native-paper";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { useEffect } from "react";
+import * as SplashScreen from "expo-splash-screen";
+import { useEffect, useState } from "react";
 import { theme } from "./src/theme";
 import RootNavigator from "./src/navigation/Index";
 import ErrorBoundary from "./src/components/shared/ErrorBoundary";
+import Splash from "./src/components/shared/Splash";
 import {
   setupAxiosInterceptors,
   setupGlobalErrorHandler,
@@ -15,25 +16,53 @@ import {
 import OfflineIndicator from "./src/components/shared/OfflineIndicator";
 
 export default function App() {
+  const [appReady, setAppReady] = useState(false);
+
   useEffect(() => {
-    // Always install global handlers — even in release, so we capture
-    // every error path including the persistence buffer.
-    setupGlobalErrorHandler();
+    let isMounted = true;
 
-    if (__DEV__) {
-      logger.info("App started in development mode");
-      setupAxiosInterceptors();
+    const ensureSplashVisible = async () => {
+      try {
+        await SplashScreen.preventAutoHideAsync();
+      } catch {
+        // ignore
+      }
 
-      // Surface crashes from the previous session (force close) to logcat.
-      // Fire-and-forget; do not block UI.
-      void logger.dumpCrashBuffer();
+      // Always install global handlers — even in release, so we capture
+      // every error path including the persistence buffer.
+      setupGlobalErrorHandler();
 
-      // Disable non-critical warnings
-      LogBox.ignoreLogs([
-        "Non-serializable values were found in the navigation state",
-        "ViewPropTypes will be removed",
-      ]);
-    }
+      if (__DEV__) {
+        logger.info("App started in development mode");
+        setupAxiosInterceptors();
+
+        // Surface crashes from the previous session (force close) to logcat.
+        // Fire-and-forget; do not block UI.
+        void logger.dumpCrashBuffer();
+
+        // Disable non-critical warnings
+        LogBox.ignoreLogs([
+          "Non-serializable values were found in the navigation state",
+          "ViewPropTypes will be removed",
+        ]);
+      }
+
+      await new Promise((resolve) => setTimeout(resolve, 2200));
+
+      if (!isMounted) return;
+      try {
+        await SplashScreen.hideAsync();
+      } catch {
+        // ignore
+      }
+      setAppReady(true);
+    };
+
+    void ensureSplashVisible();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   return (
@@ -48,6 +77,9 @@ export default function App() {
             <RootNavigator />
           </ErrorBoundary>
         </PaperProvider>
+
+        {/* JS-side branded splash, shown until the native splash hides. */}
+        {!appReady && <Splash />}
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
