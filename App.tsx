@@ -15,19 +15,21 @@ import {
 } from "./src/utils/debug";
 import OfflineIndicator from "./src/components/shared/OfflineIndicator";
 
+// Tell the native splash to stay visible until JS is ready and we hide it.
+// Must run at module load (before the first render) so the native splash
+// doesn't auto-hide in release builds where the JS bundle takes longer to
+// parse. Calling it from useEffect is too late.
+SplashScreen.preventAutoHideAsync().catch(() => {
+  // ignore — splash may already be gone
+});
+
 export default function App() {
   const [appReady, setAppReady] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
 
-    const ensureSplashVisible = async () => {
-      try {
-        await SplashScreen.preventAutoHideAsync();
-      } catch {
-        // ignore
-      }
-
+    const bootstrap = async () => {
       // Always install global handlers — even in release, so we capture
       // every error path including the persistence buffer.
       setupGlobalErrorHandler();
@@ -47,7 +49,11 @@ export default function App() {
         ]);
       }
 
-      await new Promise((resolve) => setTimeout(resolve, 2200));
+      // Wait for the native splash to finish (1.5s gives a comfortable read
+      // time for the branded JS splash). The JS <Splash /> is rendered first,
+      // so the user sees the branded screen, then we hide the native splash
+      // and the JS splash will fade out itself.
+      await new Promise((resolve) => setTimeout(resolve, 1500));
 
       if (!isMounted) return;
       try {
@@ -58,7 +64,7 @@ export default function App() {
       setAppReady(true);
     };
 
-    void ensureSplashVisible();
+    void bootstrap();
 
     return () => {
       isMounted = false;
@@ -78,8 +84,9 @@ export default function App() {
           </ErrorBoundary>
         </PaperProvider>
 
-        {/* JS-side branded splash, shown until the native splash hides. */}
-        {!appReady && <Splash />}
+        {/* Branded JS splash on top of the navigator until app is ready.
+            The component handles its own absolute positioning. */}
+        <Splash visible={!appReady} />
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
