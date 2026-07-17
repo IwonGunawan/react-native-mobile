@@ -48,7 +48,8 @@
     "logcat:js": "adb logcat -s ReactNativeJS:V ReactNative:V",
     "logcat:errors": "adb logcat *:E ReactNativeJS:V",
     "logcat:crash": "adb logcat -d -b crash",
-    "logcat:fatal": "adb logcat -s AndroidRuntime:E ReactNativeJS:E *:F"
+    "logcat:fatal": "adb logcat -s AndroidRuntime:E ReactNativeJS:E *:F",
+    "icons:android": "bash scripts/generate_launcher_icons.sh"
   },
   "private": true
 }
