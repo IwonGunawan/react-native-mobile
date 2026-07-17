@@ -39,7 +39,7 @@ export default function LoginScreen() {
       // tidak perlu navigate - RootNavigator otomatis switch ke AppNavigator
       // karena isAuth di authStore berubah jadi true
     } catch (error: any) {
-      setError(error.response?.data?.message ?? "Email atau Password salah");
+      setError(error.response?.data?.message ?? "Username atau Password salah");
     } finally {
       setIsLoading(false);
     }
@@ -80,7 +80,7 @@ export default function LoginScreen() {
               )}
               {/* Email Input */}
               <TextInput
-                label="email"
+                label="username"
                 value={email}
                 onChangeText={(v) => {
                   setEmail(v);

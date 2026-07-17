@@ -108,7 +108,7 @@ export default function PaymentHistoryScreen() {
                 />
                 <View>
                   <Text variant="bodySmall" style={styles.summaryLabel}>
-                    Total Pemasukan Bulan Ini
+                    Total
                   </Text>
                   <Text variant="titleLarge" style={styles.summaryValue}>
                     {formatRupiah(totalIncome)}

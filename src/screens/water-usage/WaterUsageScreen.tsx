@@ -176,8 +176,8 @@ export default function WaterUsageScreen() {
                 ? styles.chipSelectedText
                 : styles.chipText
             }
-            selectedColor="#fff"
-            showSelectedCheck
+            // selectedColor="#fff"
+            showSelectedCheck={false}
             compact
           >
             {v.name}

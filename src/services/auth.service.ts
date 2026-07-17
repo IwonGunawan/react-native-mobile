@@ -16,7 +16,7 @@ export const authService = {
     api.post<LoginResponse>('/auth/login', {email, password})
     .then(r => r.data),
     
-  changePassword: (current_password: string, new_password: string) =>
-    api.post('/auth/change-password', { current_password, new_password })
+  changePassword: (oldPassword: string, newPassword: string) =>
+    api.post('/auth/change-password', { oldPassword, newPassword })
        .then(r => r.data),
 };

@@ -85,7 +85,7 @@ export function useWaterUsageHistory(customerId: number) {
     setIsLoading(true);
 
     try {
-      const res = await waterUsageService.getByCustomer(customerId, { page:1, limit: 12 })
+      const res = await waterUsageService.getByCustomer(customerId, { page:1, limit: 10 })
       setHistory(res.data);
       setTotal(res.meta.totalData);
     } catch (error) {

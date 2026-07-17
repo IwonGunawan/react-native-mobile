@@ -161,12 +161,11 @@ export default function PaymentsScreen() {
               query.villageId === v.id && styles.chipSelected,
             ]}
             textStyle={
-              query.villageId == v.id
+              query.villageId === v.id
                 ? styles.chipSelectedText
                 : styles.chipText
             }
-            selectedColor="#fff"
-            showSelectedCheck
+            showSelectedCheck={false}
             compact
           >
             {v.name}

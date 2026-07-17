@@ -19,7 +19,7 @@ export function usePaymentList(queryInit?: Query) {
   const [error, setError] = useState<string|null>(null);
   const [totalData, setTotalData] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
-  const [query, setQuery] = useState<Query>({page: 1, limit: 20, sortBy: 'name', sortOrder: 'ASC', ...queryInit})
+  const [query, setQuery] = useState<Query>({page: 1, limit: 10, sortBy: 'name', sortOrder: 'ASC', ...queryInit})
 
 
   const fetchData = useCallback(async (q: Query, mode: 'init'| 'refresh'| 'more') => {
