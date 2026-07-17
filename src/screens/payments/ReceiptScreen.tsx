@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { Fragment, useCallback, useEffect, useState } from "react";
 import { View, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 import { Text, Button, Card, ActivityIndicator } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -202,38 +202,42 @@ export default function ReceiptScreen() {
             {detail.monthList.length > 0 && (
               <>
                 <View style={styles.receiptDivider} />
-
-                {detail.monthList.map((item) => {
-                  return (
-                    <ReceiptRow
-                      key={`${item.year}-${item.month}`}
-                      label={`${MONTHS[item.month]} ${item.year}`}
-                      value={formatRupiah(item.totalPrice)}
-                    />
-                  );
-                })}
+                {detail.monthList
+                  .filter((item) => item.totalPrice != null)
+                  .map((item) => {
+                    return (
+                      <Fragment key={`${item.year}-${item.month}`}>
+                        <ReceiptRow
+                          label={`${MONTHS[item.month]} ${item.year}`}
+                          value={formatRupiah(item.totalPrice)}
+                        />
+                      </Fragment>
+                    );
+                  })}
               </>
             )}
 
-            {Object.keys(detail.underpayment).length > 0 && (
-              <>
-                <View style={styles.receiptDivider} />
-                <ReceiptRow
-                  label={`Kurang bayar bln ${MONTHS[detail.underpayment.month]} ${detail.underpayment.year}`}
-                  value={formatRupiah(detail.underpayment.totalPrice)}
-                />
-              </>
-            )}
+            {detail.underpayment != null &&
+              Object.keys(detail.underpayment).length > 0 && (
+                <>
+                  <View style={styles.receiptDivider} />
+                  <ReceiptRow
+                    label={`Kurang bayar bln ${MONTHS[detail.underpayment.month]} ${detail.underpayment.year}`}
+                    value={formatRupiah(detail.underpayment.totalPrice)}
+                  />
+                </>
+              )}
 
-            {Object.keys(detail.overpayment).length > 0 && (
-              <>
-                <View style={styles.receiptDivider} />
-                <ReceiptRow
-                  label={`Lebih bayar bln ${MONTHS[detail.overpayment.month]} ${detail.overpayment.year}`}
-                  value={formatRupiah(detail.overpayment.totalPrice)}
-                />
-              </>
-            )}
+            {detail.overpayment != null &&
+              Object.keys(detail.overpayment).length > 0 && (
+                <>
+                  <View style={styles.receiptDivider} />
+                  <ReceiptRow
+                    label={`Lebih bayar bln ${MONTHS[detail.overpayment.month]} ${detail.overpayment.year}`}
+                    value={formatRupiah(detail.overpayment.totalPrice)}
+                  />
+                </>
+              )}
 
             <View style={styles.receiptDivider} />
             <ReceiptRow label="Total" value={formatRupiah(detail.total)} bold />

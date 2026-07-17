@@ -19,8 +19,8 @@ export interface ReceiptData {
   textInfo: string;
   monthTotal: number;
   monthList:    WaterUsagePrice[];
-  underpayment: WaterUsagePrice;
-  overpayment:  WaterUsagePrice;
+  underpayment: WaterUsagePrice | null;
+  overpayment:  WaterUsagePrice | null;
 }
 
 let BLEPrinter: any;
@@ -104,8 +104,8 @@ const buildReceiptText = (data: ReceiptData): string => {
   });
 
   const monthList = data.monthList ?? [];
-  const hasUnderpayment = data.underpayment && Object.keys(data.underpayment).length > 0;
-  const hasOverpayment = data.overpayment && Object.keys(data.overpayment).length > 0;
+  const hasUnderpayment = data.underpayment != null && Object.keys(data.underpayment).length > 0;
+  const hasOverpayment = data.overpayment != null && Object.keys(data.overpayment).length > 0;
 
   const lines: string[] = [
     centerText('STRUK PEMBAYARAN AIR'),
@@ -117,22 +117,25 @@ const buildReceiptText = (data: ReceiptData): string => {
     formatLine('Tgl Bayar', dateStr),
     formatLine('Jam', timeStr),
     formatLine('Jml Bulan', `${data.monthTotal} bulan`),
-    divider('-'),
   ];
+  
+  if(monthList.length > 0 && monthList[0].totalPrice != null) {
+    lines.push(divider('-'))
+    monthList.forEach((item) => {
+      lines.push(
+        formatLine(`${MONTHS[item.month]} ${item.year}`, formatRupiah(item.totalPrice)),
+      );
+    });
+  }
 
-  monthList.forEach((item) => {
-    lines.push(
-      formatLine(`${MONTHS[item.month]} ${item.year}`, formatRupiah(item.totalPrice)),
-    );
-  });
 
-  if (hasUnderpayment) {
+  if (data.underpayment != null && hasUnderpayment) {
     lines.push(
       formatLine(`Kurang bayar bln ${MONTHS[data.underpayment.month]} ${data.underpayment.year}`, formatRupiah(data.underpayment.totalPrice)),
     );
   }
 
-  if (hasOverpayment) {
+  if (data.overpayment && hasOverpayment) {
     lines.push(
       formatLine(`Lebih bayar bln ${MONTHS[data.overpayment.month]} ${data.overpayment.year}`, formatRupiah(data.overpayment.totalPrice)),
     );

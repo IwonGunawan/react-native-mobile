@@ -15,8 +15,8 @@ const shareReceiptAsPdf = async (data: ReceiptData): Promise<void> => {
   });
 
   const waterUsageList = data.monthList ?? [];
-  const hasUnderpayment = data.underpayment && Object.keys(data.underpayment).length > 0;
-  const hasOverpayment = data.overpayment && Object.keys(data.overpayment).length > 0;
+  const hasUnderpayment = data.underpayment != null && Object.keys(data.underpayment).length > 0;
+  const hasOverpayment = data.overpayment != null && Object.keys(data.overpayment).length > 0;
 
   const html = `
     <!DOCTYPE html>
@@ -76,10 +76,12 @@ const shareReceiptAsPdf = async (data: ReceiptData): Promise<void> => {
         <span>${data.monthTotal} bulan</span>
       </div>
 
-      <div class="divider"></div>
-
-      ${waterUsageList.map((item: WaterUsagePrice) => {
+      ${waterUsageList
+        .filter((item) => item.totalPrice !=null)
+        .map((item: WaterUsagePrice) => {
         return `
+          <div class="divider"></div>
+          
           <div class="row">
             <span>${MONTHS[item.month]} ${item.year}</span>
             <span>${formatRupiah(item.totalPrice)}</span>
@@ -87,14 +89,14 @@ const shareReceiptAsPdf = async (data: ReceiptData): Promise<void> => {
         `;
       }).join('')}
 
-      ${hasUnderpayment ? `
+      ${data.underpayment != null && hasUnderpayment ? `
         <div class="row">
           <span>Kurang bayar bln ${MONTHS[data.underpayment.month]} ${data.underpayment.year}</span>
           <span>${formatRupiah(data.underpayment.totalPrice)}</span>
         </div>
       ` : ''}
 
-      ${hasOverpayment ? `
+      ${data.overpayment != null && hasOverpayment ? `
         <div class="row">
           <span>Lebih bayar bln ${MONTHS[data.overpayment.month]} ${data.overpayment.year}</span>
           <span>${formatRupiah(data.overpayment.totalPrice)}</span>

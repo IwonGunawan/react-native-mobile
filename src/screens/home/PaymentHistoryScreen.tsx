@@ -9,8 +9,7 @@ import {
   MonthlyReportItem,
   reportService,
 } from "../../services/report.service";
-
-const formatRupiah = (n: number) => "Rp " + n.toLocaleString("id-ID");
+import { formatRupiah } from "../../utils";
 
 export default function PaymentHistoryScreen() {
   const navigation = useNavigation();

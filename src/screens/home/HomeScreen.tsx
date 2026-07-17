@@ -9,7 +9,7 @@ import { useAuthStore } from "../../stores/auth.store";
 import { Card, Divider, ProgressBar, Surface, Text } from "react-native-paper";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { HomeStackParams } from "../../navigation/stacks/HomeStack";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import useHomeData from "../../hooks/useHomeData";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -27,6 +27,28 @@ export default function HomeScreen() {
   const { data, isLoading, isRefresh, refetch } = useHomeData();
   const [modalVisible, setModalVisible] = useState(false);
   const [showAllArrears, setShowAllArrears] = useState(false);
+  const [now, setNow] = useState(() => new Date());
+  useEffect(() => {
+    const interval = setInterval(() => setNow(new Date()), 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
+  const hour = now.getHours();
+  const greeting =
+    hour < 11
+      ? "Selamat pagi"
+      : hour < 15
+        ? "Selamat siang"
+        : hour < 18
+          ? "Selamat sore"
+          : "Selamat malam";
+  const greetingIcon =
+    hour < 11
+      ? "weather-sunny"
+      : hour < 15
+        ? "weather-sunny"
+        : hour < 18
+          ? "weather-sunset-up"
+          : "weather-night";
 
   const allArrears = (data?.topArrears ?? []) as TopArrear[];
   const visibleArrears = showAllArrears ? allArrears : allArrears.slice(0, 5);
@@ -49,19 +71,25 @@ export default function HomeScreen() {
           <View>
             {/* ── Greeting ── */}
             <View style={styles.greeting}>
-              <View style={styles.greetingBadge}>
+              <View style={styles.greetingAvatar}>
                 <MaterialCommunityIcons
-                  name="water-outline"
-                  size={18}
+                  name={greetingIcon}
+                  size={22}
                   color={colors.primary}
                 />
+              </View>
+              <View style={styles.greetingTexts}>
                 <Text variant="bodySmall" style={styles.greetText}>
-                  Selamat bekerja
+                  {greeting}
+                </Text>
+                <Text
+                  variant="titleLarge"
+                  style={styles.nameText}
+                  numberOfLines={1}
+                >
+                  {user?.name ?? "Pengguna"}
                 </Text>
               </View>
-              <Text variant="headlineMedium" style={styles.nameText}>
-                {user?.name}
-              </Text>
             </View>
 
             {/* ── Payment Status Cards ── */}
@@ -176,7 +204,7 @@ export default function HomeScreen() {
             {/* ── Top Tunggakan ── */}
             <View style={styles.sectionRow}>
               <Text variant="titleSmall" style={styles.sectionTitle}>
-                Top Tunggakan
+                Top Sisa Tunggakan
               </Text>
             </View>
 
@@ -342,22 +370,24 @@ const styles = StyleSheet.create({
 
   // Greeting
   greeting: {
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 16,
+    gap: 12,
   },
-  greetingBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    alignSelf: "flex-start",
-    gap: 6,
+  greetingAvatar: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: colors.primaryLight + "20",
-    borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    marginBottom: 6,
+    justifyContent: "center",
+    alignItems: "center",
+    flexShrink: 0,
   },
-  greetText: { color: colors.primary, fontWeight: "600" },
+  greetingTexts: { flex: 1, minWidth: 0 },
+  greetText: { color: colors.textSecondary, fontWeight: "500" },
   nameText: { color: colors.textPrimary, fontWeight: "700" },
 
   // Payment stats

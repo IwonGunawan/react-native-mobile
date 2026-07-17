@@ -64,8 +64,8 @@ export interface Receipt {
   textInfo:     string;
   monthTotal:   number;
   monthList:    WaterUsagePrice[];
-  underpayment: WaterUsagePrice;
-  overpayment:  WaterUsagePrice;
+  underpayment: WaterUsagePrice | null;
+  overpayment:  WaterUsagePrice | null;
 }
 
   export interface PaymentHistory {
