@@ -4,7 +4,7 @@ interface User {
   id: number;
   name: string;
   email: string;
-  level: '0' | '1'; // 0=petugas, 1=admin
+  level: '0' | '1'; // 0=admin, 1=petugas
 }
 interface LoginResponse {
   access_token: string;

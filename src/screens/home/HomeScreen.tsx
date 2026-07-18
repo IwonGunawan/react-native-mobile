@@ -25,13 +25,16 @@ export default function HomeScreen() {
   const navigation = useNavigation<Nav>();
   const { user } = useAuthStore();
   const { data, isLoading, isRefresh, refetch } = useHomeData();
+
   const [modalVisible, setModalVisible] = useState(false);
   const [showAllArrears, setShowAllArrears] = useState(false);
   const [now, setNow] = useState(() => new Date());
+
   useEffect(() => {
     const interval = setInterval(() => setNow(new Date()), 60 * 1000);
     return () => clearInterval(interval);
   }, []);
+
   const hour = now.getHours();
   const greeting =
     hour < 11
@@ -93,38 +96,40 @@ export default function HomeScreen() {
             </View>
 
             {/* ── Payment Status Cards ── */}
-            <View style={styles.statsRow}>
-              <Surface style={styles.statCard} elevation={1}>
-                <MaterialCommunityIcons
-                  name="check-circle-outline"
-                  size={28}
-                  color={colors.success}
-                />
-                <Text variant="headlineMedium" style={styles.statNumber}>
-                  {isLoading ? "-" : (data?.paidCount ?? 0)}
-                </Text>
-                <Text variant="bodySmall" style={styles.statLabel}>
-                  Sudah Bayar
-                </Text>
-              </Surface>
+            {user?.level == "0" && (
+              <View style={styles.statsRow}>
+                <Surface style={styles.statCard} elevation={1}>
+                  <MaterialCommunityIcons
+                    name="check-circle-outline"
+                    size={28}
+                    color={colors.success}
+                  />
+                  <Text variant="headlineMedium" style={styles.statNumber}>
+                    {isLoading ? "-" : (data?.paidCount ?? 0)}
+                  </Text>
+                  <Text variant="bodySmall" style={styles.statLabel}>
+                    Sudah Bayar
+                  </Text>
+                </Surface>
 
-              <Surface style={styles.statCard} elevation={1}>
-                <MaterialCommunityIcons
-                  name="clock-outline"
-                  size={28}
-                  color={colors.warning}
-                />
-                <Text
-                  variant="headlineMedium"
-                  style={[styles.statNumber, { color: colors.warning }]}
-                >
-                  {isLoading ? "-" : (data?.unpaidCount ?? 0)}
-                </Text>
-                <Text variant="bodySmall" style={styles.statLabel}>
-                  Belum Bayar
-                </Text>
-              </Surface>
-            </View>
+                <Surface style={styles.statCard} elevation={1}>
+                  <MaterialCommunityIcons
+                    name="clock-outline"
+                    size={28}
+                    color={colors.warning}
+                  />
+                  <Text
+                    variant="headlineMedium"
+                    style={[styles.statNumber, { color: colors.warning }]}
+                  >
+                    {isLoading ? "-" : (data?.unpaidCount ?? 0)}
+                  </Text>
+                  <Text variant="bodySmall" style={styles.statLabel}>
+                    Belum Bayar
+                  </Text>
+                </Surface>
+              </View>
+            )}
 
             {/* ── Total Pemakaian Air ── */}
             <Card style={styles.m3Card}>
@@ -167,7 +172,8 @@ export default function HomeScreen() {
                       <Text variant="bodySmall" style={styles.progressSub}>
                         {isLoading
                           ? "Memuat..."
-                          : `${(data?.totalCustomers ?? 0) - (data?.totalChecked ?? 0)} customer belum dicek`}
+                          : `total customer yang sudah dicek meter air`}
+                        {/* : `${(data?.totalCustomers ?? 0) - (data?.totalChecked ?? 0)} customer belum dicek`} */}
                       </Text>
                     </View>
                     <View style={styles.percentBadge}>

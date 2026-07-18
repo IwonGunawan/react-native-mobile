@@ -4,6 +4,7 @@ import type { VillageStat } from "../../hooks/useHomeData";
 import { colors } from "../../theme";
 import { Button, ProgressBar, Text } from "react-native-paper";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import { useAuthStore } from "../../stores/auth.store";
 
 interface Props {
   visible: boolean;
@@ -16,6 +17,7 @@ export default function VillageProgressModal({
   stats,
   onClose,
 }: Props) {
+  const { user } = useAuthStore();
   const insets = useSafeAreaInsets();
   const totalAll = stats.reduce((s, v) => s + v.totalCustomers, 0);
   const checkedAll = stats.reduce((s, v) => s + v.checkedCount, 0);
@@ -34,9 +36,11 @@ export default function VillageProgressModal({
           <Text variant="titleMedium" style={styles.title}>
             Detail Progress per Wilayah
           </Text>
-          <Text variant="bodySmall" style={styles.subTitle}>
-            Total: {checkedAll} dari {totalAll} customer dicek
-          </Text>
+          {user?.level == "0" && (
+            <Text variant="bodySmall" style={styles.subTitle}>
+              Total: {checkedAll} dari {totalAll} customer dicek
+            </Text>
+          )}
 
           <ScrollView showsVerticalScrollIndicator={false}>
             {stats.map((s) => (

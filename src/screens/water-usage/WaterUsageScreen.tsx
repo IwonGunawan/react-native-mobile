@@ -17,6 +17,7 @@ import { WaterUsageList } from "../../services/water-usage.service";
 import { colors } from "../../theme";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useAuthStore } from "../../stores/auth.store";
 
 type Nav = NativeStackNavigationProp<WaterUsageStackParams, "WaterUsageList">;
 
@@ -35,6 +36,7 @@ function useVillages() {
 // End villages hooks
 
 export default function WaterUsageScreen() {
+  const { user } = useAuthStore();
   const navigation = useNavigation<Nav>();
   const villages = useVillages();
   const isFocused = useIsFocused();
@@ -138,9 +140,11 @@ export default function WaterUsageScreen() {
         <Text variant="titleLarge" style={styles.headerTitle}>
           Cek Air
         </Text>
-        <Text variant="bodySmall" style={styles.headerSub}>
-          {totalData} customers
-        </Text>
+        {user?.level == "0" && (
+          <Text variant="bodySmall" style={styles.headerSub}>
+            {totalData} customers
+          </Text>
+        )}
       </View>
 
       {/* Search Bar */}
@@ -185,7 +189,7 @@ export default function WaterUsageScreen() {
         ))}
 
         {/* b. separator */}
-        <View style={styles.chipDivider} />
+        {/* <View style={styles.chipDivider} /> */}
 
         {/* c. not checked filter */}
         {/* <Chip

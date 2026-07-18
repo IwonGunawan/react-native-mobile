@@ -35,16 +35,22 @@ export default function useHomeData() {
     setError(null);
 
     try {
-      const [recents, summaries, progress, waterTotal, topArrears] = await Promise.all([
-        paymentService.getRecent(),
-        dashboardService.getSummary(),
-        waterUsageService.getProgress(),
+      const [recents, waterTotal, topArrears, progress, summaries] = await Promise.all([
+        reportService.getMonthly({
+          month: new Date().getMonth() + 1,
+          year: new Date().getFullYear(),
+          page: 1,
+          limit: 5,
+          sortOrder: 'DESC',
+        }),
         reportService.getWaterUsageTotal(),
         reportService.getTopArrears(),
+        waterUsageService.getProgress(),
+        dashboardService.getSummary()
       ]);
 
       setData({
-        recentPayments: recents,
+        recentPayments: recents.data,
         totalChecked: progress.overall.checkedCount,
         totalCustomers: progress.overall.totalCustomers,
         checkPercent: progress.overall.percent,

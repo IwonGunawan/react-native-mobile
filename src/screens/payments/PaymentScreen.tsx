@@ -17,10 +17,12 @@ import { colors } from "../../theme";
 import { usePaymentList } from "../../hooks/usePayment";
 import { ListPayment } from "../../services/payment.service";
 import { formatRupiah } from "../../utils";
+import { useAuthStore } from "../../stores/auth.store";
 
 type Nav = NativeStackNavigationProp<PaymentStackParams, "PaymentList">;
 
 export default function PaymentsScreen() {
+  const { user } = useAuthStore();
   const navigation = useNavigation<Nav>();
   const isFocused = useIsFocused();
 
@@ -119,9 +121,11 @@ export default function PaymentsScreen() {
             <Text variant="titleLarge" style={styles.headerTitle}>
               Bayar Air
             </Text>
-            <Text variant="bodySmall" style={styles.headerSub}>
-              {totalData} customers
-            </Text>
+            {user?.level == "0" && (
+              <Text variant="bodySmall" style={styles.headerSub}>
+                {totalData} customers
+              </Text>
+            )}
           </View>
           <View style={styles.headerIconBadge}>
             <MaterialCommunityIcons

@@ -92,20 +92,6 @@ export interface WaterUsagePrice {
 }
 
 export const paymentService = {
-  /** HOME MENU */
-  // get recent payment limit 5
-  getRecent: () => {
-    return api.get<{ data: RecentPayment[] }>('/reports/monthly', {
-      params: {
-        month: new Date().getMonth() + 1,
-        year: new Date().getFullYear(),
-        page: 1,
-        limit: 5,
-        sortOrder: 'DESC',
-      },
-    }).then(r => r.data.data);
-  },
-  /** END Home Menu */
 
   /** PAYMENT MENU */
   // list payment 
