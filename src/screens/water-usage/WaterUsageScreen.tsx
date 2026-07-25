@@ -13,6 +13,7 @@ import { useEffect, useState } from "react";
 import { Village } from "../../types";
 import { villageService } from "../../services/village.service";
 import { useWaterUsageList } from "../../hooks/useWaterUsage";
+import { useVillageFilterCache } from "../../hooks/useVillageFilterCache";
 import { WaterUsageList } from "../../services/water-usage.service";
 import { colors } from "../../theme";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
@@ -40,6 +41,8 @@ export default function WaterUsageScreen() {
   const navigation = useNavigation<Nav>();
   const villages = useVillages();
   const isFocused = useIsFocused();
+  const { villageId: cachedVillageId, setVillageId: setCachedVillageId } =
+    useVillageFilterCache();
   const {
     data,
     isLoading,
@@ -56,6 +59,25 @@ export default function WaterUsageScreen() {
 
   // defined states
   const [searchText, setSearchText] = useState<string>("");
+  const [villageHydrated, setVillageHydrated] = useState(false);
+
+  // Restore cached village filter on first hydration
+  useEffect(() => {
+    if (!villageHydrated && cachedVillageId !== undefined) {
+      updateQuery({ villageId: cachedVillageId });
+      setVillageHydrated(true);
+    } else if (!villageHydrated) {
+      setVillageHydrated(true);
+    }
+  }, [cachedVillageId, villageHydrated]);
+
+  // Keep query in sync with cached village from other screens (e.g. PaymentScreen)
+  useEffect(() => {
+    if (!villageHydrated) return;
+    if ((query.villageId ?? undefined) !== (cachedVillageId ?? undefined)) {
+      updateQuery({ villageId: cachedVillageId });
+    }
+  }, [cachedVillageId, villageHydrated]);
 
   // debounce search - wait 500ms after user stop typing
   useEffect(() => {
@@ -150,7 +172,7 @@ export default function WaterUsageScreen() {
       {/* Search Bar */}
       <View style={styles.searchWrapper}>
         <Searchbar
-          placeholder="Cari nama atau kode..."
+          placeholder="Cari nama..."
           value={searchText}
           onChangeText={setSearchText}
           style={styles.searchBar}
@@ -166,11 +188,11 @@ export default function WaterUsageScreen() {
           <Chip
             key={v.id}
             selected={query.villageId === v.id}
-            onPress={() =>
-              updateQuery({
-                villageId: query.villageId === v.id ? undefined : v.id,
-              })
-            }
+            onPress={() => {
+              const next = query.villageId === v.id ? undefined : v.id;
+              setCachedVillageId(next);
+              updateQuery({ villageId: next });
+            }}
             style={[
               styles.chip,
               query.villageId === v.id && styles.chipSelected,

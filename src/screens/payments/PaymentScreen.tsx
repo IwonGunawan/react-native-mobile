@@ -15,6 +15,7 @@ import { villageService } from "../../services/village.service";
 import { PaymentStackParams } from "../../navigation/stacks/PaymentStack";
 import { colors } from "../../theme";
 import { usePaymentList } from "../../hooks/usePayment";
+import { useVillageFilterCache } from "../../hooks/useVillageFilterCache";
 import { ListPayment } from "../../services/payment.service";
 import { formatRupiah } from "../../utils";
 import { useAuthStore } from "../../stores/auth.store";
@@ -28,6 +29,10 @@ export default function PaymentsScreen() {
 
   const [villages, setVillages] = useState<{ id: number; name: string }[]>([]);
   const [searchText, setSearchText] = useState("");
+  const [villageHydrated, setVillageHydrated] = useState(false);
+
+  const { villageId: cachedVillageId, setVillageId: setCachedVillageId } =
+    useVillageFilterCache();
 
   const {
     data,
@@ -49,6 +54,24 @@ export default function PaymentsScreen() {
       .then(setVillages)
       .catch(() => {});
   }, []);
+
+  // Restore cached village filter on first hydration
+  useEffect(() => {
+    if (!villageHydrated && cachedVillageId !== undefined) {
+      updateQuery({ villageId: cachedVillageId });
+      setVillageHydrated(true);
+    } else if (!villageHydrated) {
+      setVillageHydrated(true);
+    }
+  }, [cachedVillageId, villageHydrated]);
+
+  // Keep query in sync with cached village from other screens (e.g. WaterUsageScreen)
+  useEffect(() => {
+    if (!villageHydrated) return;
+    if ((query.villageId ?? undefined) !== (cachedVillageId ?? undefined)) {
+      updateQuery({ villageId: cachedVillageId });
+    }
+  }, [cachedVillageId, villageHydrated]);
 
   // Debounce search
   useEffect(() => {
@@ -140,7 +163,7 @@ export default function PaymentsScreen() {
       {/* Search */}
       <View style={styles.searchWrapper}>
         <Searchbar
-          placeholder="Cari nama atau kode..."
+          placeholder="Cari nama..."
           value={searchText}
           onChangeText={setSearchText}
           style={styles.searchbar}
@@ -155,11 +178,11 @@ export default function PaymentsScreen() {
           <Chip
             key={v.id}
             selected={query.villageId === v.id}
-            onPress={() =>
-              updateQuery({
-                villageId: query.villageId === v.id ? undefined : v.id,
-              })
-            }
+            onPress={() => {
+              const next = query.villageId === v.id ? undefined : v.id;
+              setCachedVillageId(next);
+              updateQuery({ villageId: next });
+            }}
             style={[
               styles.chip,
               query.villageId === v.id && styles.chipSelected,
