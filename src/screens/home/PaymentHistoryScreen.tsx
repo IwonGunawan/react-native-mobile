@@ -10,9 +10,11 @@ import {
   reportService,
 } from "../../services/report.service";
 import { formatRupiah } from "../../utils";
+import { useAuthStore } from "../../stores/auth.store";
 
 export default function PaymentHistoryScreen() {
   const navigation = useNavigation();
+  const { user } = useAuthStore();
 
   const now = new Date();
   const [data, setData] = useState<MonthlyReportItem[]>([]);
@@ -98,7 +100,7 @@ export default function PaymentHistoryScreen() {
         }
         ListHeaderComponent={
           // Summary card
-          totalIncome > 0 ? (
+          user?.level == "0" ? (
             <Card style={styles.summaryCard}>
               <Card.Content style={styles.summaryContent}>
                 <MaterialCommunityIcons
@@ -108,7 +110,7 @@ export default function PaymentHistoryScreen() {
                 />
                 <View>
                   <Text variant="bodySmall" style={styles.summaryLabel}>
-                    Total
+                    Total Penghasilan Bulan Ini
                   </Text>
                   <Text variant="titleLarge" style={styles.summaryValue}>
                     {formatRupiah(totalIncome)}

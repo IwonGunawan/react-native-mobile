@@ -82,12 +82,24 @@ export default function PaymentHistoryScreen() {
     return (
       <Card style={styles.txCard}>
         <Card.Content style={styles.txContent}>
-          <View style={styles.iconWrap}>
-            <MaterialCommunityIcons
-              name="cash-check"
-              size={20}
-              color={colors.primary}
-            />
+          <View style={styles.dateBadge}>
+            <View style={styles.dateBadgeTop}>
+              <Text style={styles.dateBadgeDay}>
+                {paidDate.toLocaleDateString("id-ID", { day: "2-digit" })}
+              </Text>
+            </View>
+            <Text style={styles.dateBadgeMonth}>
+              {paidDate.toLocaleDateString("id-ID", { month: "short" })}
+            </Text>
+            <Text style={styles.dateBadgeYear}>
+              {paidDate.toLocaleDateString("id-ID", { year: "numeric" })}
+            </Text>
+            <Text style={styles.dateBadgeTime}>
+              {paidDate.toLocaleTimeString("id-ID", {
+                hour: "2-digit",
+                minute: "2-digit",
+              })}
+            </Text>
           </View>
 
           <View style={styles.txInfo}>
@@ -96,17 +108,6 @@ export default function PaymentHistoryScreen() {
             </Text>
             <Text variant="bodySmall" style={styles.txMeta}>
               dibayar {formatRupiah(item.cash)}
-            </Text>
-            <Text variant="bodySmall" style={styles.txMeta}>
-              {paidDate.toLocaleDateString("id-ID", {
-                day: "2-digit",
-                month: "short",
-                year: "numeric",
-              })}{" "}
-              {paidDate.toLocaleTimeString("id-ID", {
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
             </Text>
           </View>
 
@@ -140,7 +141,7 @@ export default function PaymentHistoryScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.safe}>
+    <SafeAreaView style={styles.safe} edges={["top", "left", "right"]}>
       <View style={styles.header}>
         <IconButton icon="arrow-left" onPress={() => navigation.goBack()} />
         <View style={styles.headerTitle}>
@@ -244,14 +245,47 @@ const styles = StyleSheet.create({
     alignItems: "center",
     gap: 12,
   },
-  iconWrap: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+  dateBadge: {
+    width: 60,
+    paddingVertical: 6,
+    borderRadius: 12,
     backgroundColor: colors.primaryLight + "20",
     alignItems: "center",
     justifyContent: "center",
     flexShrink: 0,
+    gap: 1,
+  },
+  dateBadgeTop: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 3,
+  },
+  dateBadgeDay: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: colors.textPrimary,
+    lineHeight: 16,
+  },
+  dateBadgeMonth: {
+    fontSize: 9,
+    fontWeight: "600",
+    color: colors.primary,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    lineHeight: 11,
+  },
+  dateBadgeYear: {
+    fontSize: 9,
+    fontWeight: "500",
+    color: colors.textSecondary,
+    lineHeight: 11,
+  },
+  dateBadgeTime: {
+    fontSize: 10,
+    fontWeight: "600",
+    color: colors.textPrimary,
+    lineHeight: 12,
+    marginTop: 2,
   },
   txInfo: { flex: 1 },
   txTitle: { fontWeight: "700", color: colors.primary },

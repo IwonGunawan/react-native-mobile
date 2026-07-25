@@ -210,7 +210,7 @@ export default function HomeScreen() {
             {/* ── Top Tunggakan ── */}
             <View style={styles.sectionRow}>
               <Text variant="titleSmall" style={styles.sectionTitle}>
-                Top Sisa Tunggakan
+                Top Tunggakan
               </Text>
             </View>
 
@@ -277,7 +277,7 @@ export default function HomeScreen() {
               <Text variant="titleSmall" style={styles.sectionTitle}>
                 Transaksi Terakhir
               </Text>
-              <TouchableOpacity
+              {/* <TouchableOpacity
                 onPress={() => navigation.navigate("PaymentHistory")}
                 style={styles.seeMore}
               >
@@ -287,7 +287,7 @@ export default function HomeScreen() {
                   size={14}
                   color={colors.primary}
                 />
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </View>
 
             {/* Empty state */}
