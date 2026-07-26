@@ -226,7 +226,7 @@ export default function ReceiptScreen() {
               </>
             )}
 
-            {detail.overpayment != null &&
+            {/* {detail.overpayment != null &&
               Object.keys(detail.overpayment).length > 0 && (
                 <>
                   <View style={styles.receiptDivider} />
@@ -235,7 +235,7 @@ export default function ReceiptScreen() {
                     value={formatRupiah(detail.overpayment.totalPrice)}
                   />
                 </>
-              )}
+              )} */}
 
             <View style={styles.receiptDivider} />
             <ReceiptRow label="Total" value={formatRupiah(detail.total)} bold />

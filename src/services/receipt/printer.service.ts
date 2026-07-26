@@ -135,11 +135,11 @@ const buildReceiptText = (data: ReceiptData): string => {
     );
   }
 
-  if (data.overpayment && hasOverpayment) {
-    lines.push(
-      formatLine(`Lebih bayar bln ${MONTHS[data.overpayment.month]} ${data.overpayment.year}`, formatRupiah(data.overpayment.totalPrice)),
-    );
-  }
+  // if (data.overpayment && hasOverpayment) {
+  //   lines.push(
+  //     formatLine(`Lebih bayar bln ${MONTHS[data.overpayment.month]} ${data.overpayment.year}`, formatRupiah(data.overpayment.totalPrice)),
+  //   );
+  // }
 
   lines.push(
     divider('-'),

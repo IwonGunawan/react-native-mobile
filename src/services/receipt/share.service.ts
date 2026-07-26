@@ -96,13 +96,6 @@ const shareReceiptAsPdf = async (data: ReceiptData): Promise<void> => {
         </div>
       ` : ''}
 
-      ${data.overpayment != null && hasOverpayment ? `
-        <div class="row">
-          <span>Lebih bayar bln ${MONTHS[data.overpayment.month]} ${data.overpayment.year}</span>
-          <span>${formatRupiah(data.overpayment.totalPrice)}</span>
-        </div>
-      ` : ''}
-
       <div class="divider"></div>
 
       <div class="row">
