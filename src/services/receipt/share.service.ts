@@ -75,26 +75,25 @@ const shareReceiptAsPdf = async (data: ReceiptData): Promise<void> => {
         <span>Jml Bulan</span>
         <span>${data.monthTotal} bulan</span>
       </div>
+      <div class="divider"></div>
+
+      ${data.underpayment != null && hasUnderpayment ? `
+        <div class="row">
+          <span>Kurang bayar ${MONTHS[data.underpayment.month]} ${data.underpayment.year}</span>
+          <span>${formatRupiah(data.underpayment.totalPrice)}</span>
+        </div>
+      ` : ''}
 
       ${waterUsageList
         .filter((item) => item.totalPrice !=null)
         .map((item: WaterUsagePrice) => {
-        return `
-          <div class="divider"></div>
-          
+        return `          
           <div class="row">
             <span>${MONTHS[item.month]} ${item.year}</span>
             <span>${formatRupiah(item.totalPrice)}</span>
           </div>
         `;
       }).join('')}
-
-      ${data.underpayment != null && hasUnderpayment ? `
-        <div class="row">
-          <span>Kurang bayar bln ${MONTHS[data.underpayment.month]} ${data.underpayment.year}</span>
-          <span>${formatRupiah(data.underpayment.totalPrice)}</span>
-        </div>
-      ` : ''}
 
       <div class="divider"></div>
 
@@ -109,7 +108,11 @@ const shareReceiptAsPdf = async (data: ReceiptData): Promise<void> => {
 
       <div class="divider"></div>
       <div class="footer">${data.textInfo}</div>
-      <div class="footer">Terima kasih</div>
+      <div class="footer">
+      Agar lebih mudah,
+      bayar kapan saja
+      bisa di Loket</div>
+      <div class="footer">Terima kasih</div
     </body>
     </html>
   `;

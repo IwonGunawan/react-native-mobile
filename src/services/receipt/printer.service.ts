@@ -118,9 +118,16 @@ const buildReceiptText = (data: ReceiptData): string => {
     formatLine('Jam', timeStr),
     formatLine('Jml Bulan', `${data.monthTotal} bulan`),
   ];
+
+  lines.push(divider('-'))
+
+  if (data.underpayment != null && hasUnderpayment) {
+    lines.push(
+      formatLine(`Kurang bayar ${MONTHS[data.underpayment.month]} ${data.underpayment.year}`, formatRupiah(data.underpayment.totalPrice)),
+    );
+  }
   
   if(monthList.length > 0 && monthList[0].totalPrice != null) {
-    lines.push(divider('-'))
     monthList.forEach((item) => {
       lines.push(
         formatLine(`${MONTHS[item.month]} ${item.year}`, formatRupiah(item.totalPrice)),
@@ -128,16 +135,9 @@ const buildReceiptText = (data: ReceiptData): string => {
     });
   }
 
-
-  if (data.underpayment != null && hasUnderpayment) {
-    lines.push(
-      formatLine(`Kurang bayar bln ${MONTHS[data.underpayment.month]} ${data.underpayment.year}`, formatRupiah(data.underpayment.totalPrice)),
-    );
-  }
-
   // if (data.overpayment && hasOverpayment) {
   //   lines.push(
-  //     formatLine(`Lebih bayar bln ${MONTHS[data.overpayment.month]} ${data.overpayment.year}`, formatRupiah(data.overpayment.totalPrice)),
+  //     formatLine(`Lebih bayar ${MONTHS[data.overpayment.month]} ${data.overpayment.year}`, formatRupiah(data.overpayment.totalPrice)),
   //   );
   // }
 
@@ -156,8 +156,8 @@ const buildReceiptText = (data: ReceiptData): string => {
     divider('='),
     centerText(data.textInfo),
     '',
+    centerText('Agar lebih mudah, bayar kapan saja bisa di loket'),
     centerText('Terima kasih'),
-    '',
     '', // extra feed supaya kertas keluar cukup
   );
 
