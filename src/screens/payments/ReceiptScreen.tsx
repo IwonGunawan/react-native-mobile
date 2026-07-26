@@ -199,9 +199,18 @@ export default function ReceiptScreen() {
               value={`${detail.monthTotal} bulan`}
             />
 
+            <View style={styles.receiptDivider} />
+
+            {detail.underpayment != null &&
+              Object.keys(detail.underpayment).length > 0 && (
+                <ReceiptRow
+                  label={`Kurang bayar ${MONTHS[detail.underpayment.month]} ${detail.underpayment.year}`}
+                  value={formatRupiah(detail.underpayment.totalPrice)}
+                />
+              )}
+
             {detail.monthList.length > 0 && (
               <>
-                <View style={styles.receiptDivider} />
                 {detail.monthList
                   .filter((item) => item.totalPrice != null)
                   .map((item) => {
@@ -217,23 +226,12 @@ export default function ReceiptScreen() {
               </>
             )}
 
-            {detail.underpayment != null &&
-              Object.keys(detail.underpayment).length > 0 && (
-                <>
-                  <View style={styles.receiptDivider} />
-                  <ReceiptRow
-                    label={`Kurang bayar bln ${MONTHS[detail.underpayment.month]} ${detail.underpayment.year}`}
-                    value={formatRupiah(detail.underpayment.totalPrice)}
-                  />
-                </>
-              )}
-
             {detail.overpayment != null &&
               Object.keys(detail.overpayment).length > 0 && (
                 <>
                   <View style={styles.receiptDivider} />
                   <ReceiptRow
-                    label={`Lebih bayar bln ${MONTHS[detail.overpayment.month]} ${detail.overpayment.year}`}
+                    label={`Lebih bayar ${MONTHS[detail.overpayment.month]} ${detail.overpayment.year}`}
                     value={formatRupiah(detail.overpayment.totalPrice)}
                   />
                 </>
