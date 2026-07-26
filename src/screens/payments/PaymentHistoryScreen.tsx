@@ -76,26 +76,23 @@ export default function PaymentHistoryScreen() {
   };
 
   const renderItem = ({ item }: { item: PaymentHistory }) => {
-    const paidDate = new Date(item.createdAt);
+    const paidAt = new Date(item.createdAt);
     const statusInfo = STATUS_MAP[item.status] ?? STATUS_MAP["1"];
 
     return (
       <Card style={styles.txCard}>
         <Card.Content style={styles.txContent}>
           <View style={styles.dateBadge}>
-            <View style={styles.dateBadgeTop}>
-              <Text style={styles.dateBadgeDay}>
-                {paidDate.toLocaleDateString("id-ID", { day: "2-digit" })}
+            <View style={styles.dateBadgeMonth}>
+              <Text style={styles.dateBadgeMonthText}>
+                {paidAt.toLocaleDateString("id-ID", { month: "short" })}
               </Text>
             </View>
-            <Text style={styles.dateBadgeMonth}>
-              {paidDate.toLocaleDateString("id-ID", { month: "short" })}
-            </Text>
-            <Text style={styles.dateBadgeYear}>
-              {paidDate.toLocaleDateString("id-ID", { year: "numeric" })}
+            <Text style={styles.dateBadgeDay}>
+              {paidAt.toLocaleDateString("id-ID", { day: "2-digit" })}
             </Text>
             <Text style={styles.dateBadgeTime}>
-              {paidDate.toLocaleTimeString("id-ID", {
+              {paidAt.toLocaleTimeString("id-ID", {
                 hour: "2-digit",
                 minute: "2-digit",
               })}
@@ -108,6 +105,9 @@ export default function PaymentHistoryScreen() {
             </Text>
             <Text variant="bodySmall" style={styles.txMeta}>
               dibayar {formatRupiah(item.cash)}
+            </Text>
+            <Text variant="bodySmall" style={styles.txMeta}>
+              sisa {formatRupiah(item.total - item.cash)}
             </Text>
           </View>
 
@@ -246,45 +246,39 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   dateBadge: {
-    width: 60,
-    paddingVertical: 6,
-    borderRadius: 12,
+    width: 54,
+    height: 64,
+    borderRadius: 10,
     backgroundColor: colors.primaryLight + "20",
     alignItems: "center",
     justifyContent: "center",
     flexShrink: 0,
-    gap: 1,
-  },
-  dateBadgeTop: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 3,
-  },
-  dateBadgeDay: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: colors.textPrimary,
-    lineHeight: 16,
+    overflow: "hidden",
   },
   dateBadgeMonth: {
-    fontSize: 9,
-    fontWeight: "600",
-    color: colors.primary,
+    width: "100%",
+    backgroundColor: colors.primary,
+    paddingVertical: 4,
+    alignItems: "center",
+  },
+  dateBadgeMonthText: {
+    color: "#fff",
+    fontSize: 10,
+    fontWeight: "700",
     textTransform: "uppercase",
     letterSpacing: 0.5,
-    lineHeight: 11,
   },
-  dateBadgeYear: {
-    fontSize: 9,
-    fontWeight: "500",
-    color: colors.textSecondary,
-    lineHeight: 11,
+  dateBadgeDay: {
+    color: colors.textPrimary,
+    fontSize: 18,
+    fontWeight: "700",
+    marginTop: 6,
+    lineHeight: 20,
   },
   dateBadgeTime: {
+    color: colors.textSecondary,
     fontSize: 10,
     fontWeight: "600",
-    color: colors.textPrimary,
-    lineHeight: 12,
     marginTop: 2,
   },
   txInfo: { flex: 1 },

@@ -120,53 +120,59 @@ export default function PaymentHistoryScreen() {
             </Card>
           ) : null
         }
-        renderItem={({ item, index }) => (
-          <Card
-            style={[
-              styles.txCard,
-              index === 0 && styles.txCardFirst,
-              index === data.length - 1 && styles.txCardLast,
-            ]}
-          >
-            <Card.Content style={styles.txContent}>
-              <View style={styles.avatar}>
-                <Text style={styles.avatarText}>
-                  {item.customerName?.charAt(0).toUpperCase()}
-                </Text>
-              </View>
+        renderItem={({ item, index }) => {
+          const paidAt = new Date(item.paidDate);
+          return (
+            <Card
+              style={[
+                styles.txCard,
+                index === 0 && styles.txCardFirst,
+                index === data.length - 1 && styles.txCardLast,
+              ]}
+            >
+              <Card.Content style={styles.txContent}>
+                <View style={styles.dateBadge}>
+                  <View style={styles.dateBadgeMonth}>
+                    <Text style={styles.dateBadgeMonthText}>
+                      {paidAt.toLocaleDateString("id-ID", { month: "short" })}
+                    </Text>
+                  </View>
+                  <Text style={styles.dateBadgeDay}>
+                    {paidAt.toLocaleDateString("id-ID", { day: "2-digit" })}
+                  </Text>
+                  <Text style={styles.dateBadgeTime}>
+                    {paidAt.toLocaleTimeString("id-ID", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </Text>
+                </View>
 
-              <View style={styles.txInfo}>
-                <Text variant="bodyMedium" style={styles.txName}>
-                  {item.customerName}
-                </Text>
-                <Text variant="bodySmall" style={styles.txMeta}>
-                  {item.village} · {item.officer}
-                </Text>
-                <Text variant="bodySmall" style={styles.txMeta}>
-                  {new Date(item.paidDate).toLocaleDateString("id-ID", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                  })}{" "}
-                  {new Date(item.paidDate).toLocaleTimeString("id-ID", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </Text>
-              </View>
+                <View style={styles.txInfo}>
+                  <Text variant="bodyMedium" style={styles.txName}>
+                    {item.customerName}
+                  </Text>
+                  <Text variant="bodySmall" style={styles.txMeta}>
+                    {item.village} · {item.officer}
+                  </Text>
+                </View>
 
-              <View style={styles.txAmount}>
-                <Text variant="bodyMedium" style={styles.txTotal}>
-                  {formatRupiah(item.total)}
-                </Text>
-                <Text variant="bodySmall" style={styles.txCash}>
-                  Tunai {formatRupiah(item.cash)}
-                </Text>
-              </View>
-            </Card.Content>
-            <Divider />
-          </Card>
-        )}
+                <View style={styles.txAmount}>
+                  <Text variant="bodyMedium" style={styles.txTotal}>
+                    {formatRupiah(item.total)}
+                  </Text>
+                  <Text variant="bodySmall" style={styles.txCash}>
+                    dibayar {formatRupiah(item.cash)}
+                  </Text>
+                  <Text variant="bodySmall" style={styles.txCash}>
+                    sisa {formatRupiah(item.total - item.cash)}
+                  </Text>
+                </View>
+              </Card.Content>
+              <Divider />
+            </Card>
+          );
+        }}
         // Load more saat scroll ke bawah
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.3}
@@ -252,9 +258,48 @@ const styles = StyleSheet.create({
     flexShrink: 0,
   },
   avatarText: { color: colors.primary, fontWeight: "700", fontSize: 16 },
+  dateBadge: {
+    width: 54,
+    height: 64,
+    borderRadius: 10,
+    backgroundColor: colors.primaryLight + "20",
+    alignItems: "center",
+    justifyContent: "center",
+    flexShrink: 0,
+    overflow: "hidden",
+    marginTop: -5,
+    marginBottom: 10,
+  },
+  dateBadgeMonth: {
+    width: "100%",
+    backgroundColor: colors.primary,
+    paddingVertical: 4,
+    alignItems: "center",
+  },
+  dateBadgeMonthText: {
+    color: "#fff",
+    fontSize: 10,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  dateBadgeDay: {
+    color: colors.textPrimary,
+    fontSize: 18,
+    fontWeight: "700",
+    marginTop: 6,
+    lineHeight: 20,
+  },
+  dateBadgeTime: {
+    color: colors.textSecondary,
+    fontSize: 10,
+    fontWeight: "600",
+    marginTop: 2,
+  },
   txInfo: { flex: 1 },
   txName: { fontWeight: "600", color: colors.textPrimary },
   txMeta: { color: colors.textSecondary, marginTop: 1 },
+  txMetaYear: { color: colors.textSecondary, marginTop: 1, fontSize: 11 },
   txAmount: { alignItems: "flex-end", flexShrink: 0 },
   txTotal: { fontWeight: "700", color: colors.primary },
   txCash: { color: colors.textSecondary, marginTop: 2 },
