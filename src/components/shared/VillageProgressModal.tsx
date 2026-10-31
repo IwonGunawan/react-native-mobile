@@ -79,13 +79,13 @@ export default function VillageProgressModal({
                   progress={
                     s.totalCustomers > 0 ? s.checkedCount / s.totalCustomers : 0
                   }
-                  color={
-                    s.percent === 100
-                      ? colors.success
-                      : s.percent >= 50
-                        ? colors.primary
-                        : colors.warning
-                  }
+                   color={
+                     s.percent === 100
+                       ? "#2e7d32"
+                       : s.percent >= 51
+                         ? "#f9a825"
+                         : colors.danger
+                   }
                   style={styles.progressBar}
                 />
 

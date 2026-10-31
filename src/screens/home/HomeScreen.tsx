@@ -249,8 +249,10 @@ export default function HomeScreen() {
                     progress={isLoading ? 0 : (data?.checkPercent ?? 0) / 100}
                     color={
                       (data?.checkPercent ?? 0) === 100
-                        ? colors.success
-                        : colors.primary
+                        ? "#2e7d32"
+                        : (data?.checkPercent ?? 0) >= 51
+                          ? "#f9a825"
+                          : colors.danger
                     }
                     style={styles.progressBar}
                   />
