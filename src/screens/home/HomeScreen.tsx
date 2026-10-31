@@ -158,7 +158,9 @@ export default function HomeScreen() {
                       <TouchableOpacity
                         style={styles.copyBtn}
                         onPress={async () => {
-                          await Clipboard.setStringAsync(data?.bankInfo?.accountNumber || "");
+                          await Clipboard.setStringAsync(
+                            data?.bankInfo?.accountNumber || "",
+                          );
                           Alert.alert(
                             "Berhasil",
                             "Nomor rekening berhasil disalin",
@@ -233,13 +235,7 @@ export default function HomeScreen() {
                   <View style={styles.progressHeader}>
                     <View>
                       <Text variant="titleSmall" style={styles.progressTitle}>
-                        Progress Cek Air Bulan Ini
-                      </Text>
-                      <Text variant="bodySmall" style={styles.progressSub}>
-                        {isLoading
-                          ? "Memuat..."
-                          : `total customer yang sudah dicek meter air`}
-                        {/* : `${(data?.totalCustomers ?? 0) - (data?.totalChecked ?? 0)} customer belum dicek`} */}
+                        Kilometer yang sudah dicek
                       </Text>
                     </View>
                     <View style={styles.percentBadge}>
@@ -427,11 +423,19 @@ export default function HomeScreen() {
         contentContainerStyle={styles.list}
       />
 
-      <VillageProgressModal
-        visible={modalVisible}
-        stats={data?.villageStats ?? []}
-        onClose={() => setModalVisible(false)}
-      />
+       <VillageProgressModal
+         visible={modalVisible}
+         stats={data?.villageStats ?? []}
+         onClose={() => setModalVisible(false)}
+         onVillagePress={(villageId) => {
+           setModalVisible(false);
+           const parent = navigation.getParent() as any;
+           parent?.navigate("WaterUsage", {
+             screen: "WaterUsageList",
+             params: { villageId, isUnchecked: true },
+           });
+         }}
+       />
     </SafeAreaView>
   );
 }

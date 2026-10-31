@@ -4,7 +4,9 @@ import WaterUsageScreen from "../../screens/water-usage/WaterUsageScreen";
 import InputMeterScreen from "../../screens/water-usage/InputMeterScreen";
 
 export type WaterUsageStackParams = {
-  WaterUsageList: undefined;
+  WaterUsageList:
+    | { villageId?: number; isUnchecked?: boolean }
+    | undefined;
   InputMeter: { customer: WaterUsageList };
 };
 

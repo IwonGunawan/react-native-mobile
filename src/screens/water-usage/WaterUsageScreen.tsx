@@ -5,7 +5,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { Card, Chip, Searchbar, Text, Divider } from "react-native-paper";
+import { Card, Checkbox, Chip, Searchbar, Text, Divider } from "react-native-paper";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { WaterUsageStackParams } from "../../navigation/stacks/WaterUsageStack";
 import { useIsFocused, useNavigation } from "@react-navigation/native";
@@ -15,6 +15,7 @@ import { villageService } from "../../services/village.service";
 import { useWaterUsageList } from "../../hooks/useWaterUsage";
 import { useVillageFilterCache } from "../../hooks/useVillageFilterCache";
 import { WaterUsageList } from "../../services/water-usage.service";
+import { useRoute, RouteProp } from "@react-navigation/native";
 import { colors } from "../../theme";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -39,6 +40,7 @@ function useVillages() {
 export default function WaterUsageScreen() {
   const { user } = useAuthStore();
   const navigation = useNavigation<Nav>();
+  const route = useRoute<RouteProp<WaterUsageStackParams, "WaterUsageList">>();
   const villages = useVillages();
   const isFocused = useIsFocused();
   const { villageId: cachedVillageId, setVillageId: setCachedVillageId } =
@@ -55,7 +57,10 @@ export default function WaterUsageScreen() {
     updateQuery,
     loadMore,
     refresh,
-  } = useWaterUsageList();
+  } = useWaterUsageList({
+    villageId: route.params?.villageId,
+    isUnchecked: route.params?.isUnchecked,
+  });
 
   // defined states
   const [searchText, setSearchText] = useState<string>("");
@@ -78,6 +83,23 @@ export default function WaterUsageScreen() {
       updateQuery({ villageId: cachedVillageId });
     }
   }, [cachedVillageId, villageHydrated]);
+
+  // Terapkan filter awal dari navigation params tanpa double fetch.
+  useEffect(() => {
+    const nextVillageId = route.params?.villageId;
+    const nextUnchecked = route.params?.isUnchecked;
+
+    if (nextVillageId !== undefined) {
+      setCachedVillageId(nextVillageId);
+      if (nextVillageId !== query.villageId) {
+        updateQuery({ villageId: nextVillageId });
+      }
+    }
+
+    if (nextUnchecked !== undefined && nextUnchecked !== query.isUnchecked) {
+      updateQuery({ isUnchecked: nextUnchecked });
+    }
+  }, [route.params?.villageId, route.params?.isUnchecked]);
 
   // debounce search - wait 500ms after user stop typing
   useEffect(() => {
@@ -117,6 +139,11 @@ export default function WaterUsageScreen() {
             <Text variant="bodySmall" style={styles.customerCode}>
               {item.code}
             </Text>
+            {item.lastMeter != null && (
+              <Text variant="bodySmall" style={styles.lastMeterText}>
+                Meter terakhir: {item.lastMeter}
+              </Text>
+            )}
           </View>
 
           {/* Status */}
@@ -179,6 +206,22 @@ export default function WaterUsageScreen() {
           inputStyle={styles.searchInput}
           elevation={0}
         />
+      </View>
+
+      {/* Filter Belum Dicek */}
+      <View style={styles.uncheckedRow}>
+        <Checkbox
+          status={query.isUnchecked ? "checked" : "unchecked"}
+          onPress={() => updateQuery({ isUnchecked: !query.isUnchecked })}
+        />
+        <TouchableOpacity
+          onPress={() => updateQuery({ isUnchecked: !query.isUnchecked })}
+          activeOpacity={0.7}
+        >
+          <Text variant="bodyMedium" style={styles.uncheckedLabel}>
+            Belum dicek
+          </Text>
+        </TouchableOpacity>
       </View>
 
       {/* Filter Chips */}
@@ -333,6 +376,22 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     fontSize: 14,
+  },
+
+  // Unchecked filter
+  uncheckedRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingBottom: 4,
+  },
+  uncheckedLabel: {
+    color: colors.textPrimary,
+    fontWeight: "500",
+  },
+  lastMeterText: {
+    color: colors.textSecondary,
+    marginTop: 2,
   },
 
   // Chips
