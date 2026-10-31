@@ -1,4 +1,5 @@
 import {
+  Alert,
   FlatList,
   RefreshControl,
   StyleSheet,
@@ -18,6 +19,7 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import VillageProgressModal from "../../components/shared/VillageProgressModal";
 import { TopArrear } from "../../services/report.service";
 import { formatRupiah } from "../../utils";
+import * as Clipboard from "expo-clipboard";
 
 type Nav = NativeStackNavigationProp<HomeStackParams, "HomeMain">;
 
@@ -130,6 +132,70 @@ export default function HomeScreen() {
                 </Surface>
               </View>
             )}
+
+            {/* ── Rekening Pembayaran ── */}
+            <Card style={styles.accountCard}>
+              <Card.Content>
+                <View style={styles.accountHeader}>
+                  <MaterialCommunityIcons
+                    name="bank"
+                    size={30}
+                    color={colors.primary}
+                  />
+                  <Text variant="titleMedium" style={styles.accountTitle}>
+                    Informasi Rekening Pembayaran
+                  </Text>
+                </View>
+                <View style={styles.accountRow}>
+                  <Text variant="bodyLarge" style={styles.accountLabel}>
+                    No. Rekening
+                  </Text>
+                  <View style={styles.accountValueRow}>
+                    <Text variant="titleMedium" style={styles.accountValue}>
+                      {data?.bankInfo?.accountNumber ?? "-"}
+                    </Text>
+                    {data?.bankInfo?.accountNumber ? (
+                      <TouchableOpacity
+                        style={styles.copyBtn}
+                        onPress={async () => {
+                          await Clipboard.setStringAsync(data?.bankInfo?.accountNumber || "");
+                          Alert.alert(
+                            "Berhasil",
+                            "Nomor rekening berhasil disalin",
+                          );
+                        }}
+                        activeOpacity={0.7}
+                      >
+                        <MaterialCommunityIcons
+                          name="content-copy"
+                          size={18}
+                          color={colors.primary}
+                        />
+                        <Text style={styles.copyText}>Salin</Text>
+                      </TouchableOpacity>
+                    ) : null}
+                  </View>
+                </View>
+                <Divider style={styles.accountDivider} />
+                <View style={styles.accountRow}>
+                  <Text variant="bodyLarge" style={styles.accountLabel}>
+                    Nama Bank
+                  </Text>
+                  <Text variant="titleMedium" style={styles.accountValue}>
+                    {data?.bankInfo?.bankName ?? "-"}
+                  </Text>
+                </View>
+                <Divider style={styles.accountDivider} />
+                <View style={styles.accountRow}>
+                  <Text variant="bodyLarge" style={styles.accountLabel}>
+                    Atas Nama
+                  </Text>
+                  <Text variant="titleMedium" style={styles.accountValue}>
+                    {data?.bankInfo?.accountName ?? "-"}
+                  </Text>
+                </View>
+              </Card.Content>
+            </Card>
 
             {/* ── Total Pemakaian Air ── */}
             <Card style={styles.m3Card}>
@@ -384,17 +450,56 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   greetingAvatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     backgroundColor: colors.primaryLight + "20",
     justifyContent: "center",
     alignItems: "center",
     flexShrink: 0,
   },
   greetingTexts: { flex: 1, minWidth: 0 },
-  greetText: { color: colors.textSecondary, fontWeight: "500" },
-  nameText: { color: colors.textPrimary, fontWeight: "700" },
+  greetText: { color: colors.textSecondary, fontWeight: "500", fontSize: 15 },
+  nameText: { color: colors.textPrimary, fontWeight: "700", fontSize: 22 },
+
+  // Rekening
+  accountCard: {
+    marginHorizontal: 16,
+    marginBottom: 12,
+    borderRadius: 12,
+    elevation: 2,
+  },
+  accountHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginBottom: 12,
+  },
+  accountTitle: { fontWeight: "700", color: colors.textPrimary, fontSize: 18 },
+  accountRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 8,
+  },
+  accountLabel: {
+    color: colors.textSecondary,
+    fontSize: 16,
+    fontWeight: "500",
+  },
+  accountValueRow: { flexDirection: "row", alignItems: "center", gap: 10 },
+  accountValue: { color: colors.textPrimary, fontWeight: "700", fontSize: 18 },
+  copyBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: colors.primaryLight + "15",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  copyText: { color: colors.primary, fontWeight: "600", fontSize: 15 },
+  accountDivider: { marginVertical: 4 },
 
   // Payment stats
   statsRow: {
