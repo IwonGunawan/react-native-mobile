@@ -112,6 +112,10 @@ export const paymentService = {
     .then(r => r.data);
   },
 
+  // top arrears aligned with payment detail
+  getTopArrears: (limit?: number) =>
+    api.get<ListPayment[]>('/payments/top-arrears', { params: { limit } }).then(r => r.data),
+
   // histories payment
   histories: (customerId: number, params?: {page: number, limit: number}) => {
     return api.get<PaginatedResponse<PaymentHistory>>(`/payments/histories/${customerId}`, {params})

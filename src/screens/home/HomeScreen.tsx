@@ -17,7 +17,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { colors } from "../../theme";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import VillageProgressModal from "../../components/shared/VillageProgressModal";
-import { TopArrear } from "../../services/report.service";
+import { ListPayment } from "../../services/payment.service";
 import { formatRupiah } from "../../utils";
 import * as Clipboard from "expo-clipboard";
 
@@ -55,7 +55,7 @@ export default function HomeScreen() {
           ? "weather-sunset-up"
           : "weather-night";
 
-  const allArrears = (data?.topArrears ?? []) as TopArrear[];
+  const allArrears = (data?.topArrears ?? []) as ListPayment[];
   const visibleArrears = showAllArrears ? allArrears : allArrears.slice(0, 5);
   const arrearsHasMore = allArrears.length > 5;
 
@@ -300,15 +300,26 @@ export default function HomeScreen() {
                           <Text style={styles.arrearRankText}>{index + 1}</Text>
                         </View>
                         <View style={styles.arrearInfo}>
-                          <Text variant="bodyMedium" style={styles.arrearName}>
-                            {item.name}
-                          </Text>
+                          <TouchableOpacity
+                            onPress={() => {
+                              const parent = navigation.getParent() as any;
+                              parent?.navigate("Payment", {
+                                screen: "Bill",
+                                params: { customer: item },
+                              });
+                            }}
+                            activeOpacity={0.7}
+                          >
+                            <Text variant="bodyMedium" style={styles.arrearName}>
+                              {item.name}
+                            </Text>
+                          </TouchableOpacity>
                           <Text variant="bodySmall" style={styles.arrearCode}>
                             {item.code}
                           </Text>
                         </View>
                         <Text variant="bodyMedium" style={styles.arrearAmount}>
-                          {formatRupiah(item.arrearsAmount)}
+                          {formatRupiah(item.finalTotal)}
                         </Text>
                       </View>
                       {(index < visibleArrears.length - 1 ||
