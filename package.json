@@ -40,6 +40,7 @@
   "scripts": {
     "start": "expo start",
     "android:build": "expo run:android",
+    "android:release": "cd android && ./gradlew assembleRelease -PreactNativeArchitectures=arm64-v8a",
     "android:dev": "expo start --android",
     "android:build-client": "expo start --dev-client",
     "ios": "expo run:ios",
