@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
-import { paymentService, RecentPayment } from "../services/payment.service";
+import { paymentService, RecentPayment, ListPayment } from "../services/payment.service";
 import { dashboardService } from "../services/dashboard.service";
 import { waterUsageService } from "../services/water-usage.service";
-import { reportService, TopArrear } from "../services/report.service";
+import { reportService } from "../services/report.service";
+import { siteSettingService, BankInfo } from "../services/site-setting.service";
 
 export interface VillageStat {
   villageId: number;
@@ -21,7 +22,8 @@ export interface HomeData {
   paidCount: number;
   unpaidCount: number;
   totalM3: number;
-  topArrears: TopArrear[];
+  topArrears: ListPayment[];
+  bankInfo: BankInfo | null;
 }
 
 export default function useHomeData() {
@@ -35,7 +37,7 @@ export default function useHomeData() {
     setError(null);
 
     try {
-      const [recents, waterTotal, topArrears, progress, summaries] = await Promise.all([
+      const [recents, waterTotal, topArrears, progress, summaries, bankInfo] = await Promise.all([
         reportService.getMonthly({
           month: new Date().getMonth() + 1,
           year: new Date().getFullYear(),
@@ -44,9 +46,10 @@ export default function useHomeData() {
           sortOrder: 'DESC',
         }),
         reportService.getWaterUsageTotal(),
-        reportService.getTopArrears(),
+        paymentService.getTopArrears(10),
         waterUsageService.getProgress(),
-        dashboardService.getSummary()
+        dashboardService.getSummary(),
+        siteSettingService.getBankInfo(),
       ]);
 
       setData({
@@ -59,6 +62,7 @@ export default function useHomeData() {
         unpaidCount: summaries.unpaidCount,
         totalM3: waterTotal.totalMeterUsage,
         topArrears,
+        bankInfo,
       });
     } catch (error) {
       setError('failed load data')

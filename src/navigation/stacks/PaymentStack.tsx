@@ -7,7 +7,7 @@ import PaymentHistoryScreen from "../../screens/payments/PaymentHistoryScreen";
 import { Bill, ListPayment as Customer } from "../../services/payment.service";
 
 export type PaymentStackParams = {
-  PaymentList: undefined;
+  PaymentList: { refreshAt?: number } | undefined;
   Bill: { customer: Customer };
   Pay: { customer: Customer; bill: Bill };
   Receipt: { customer: Customer; paymentId: number };

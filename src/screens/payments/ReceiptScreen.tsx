@@ -76,7 +76,10 @@ export default function ReceiptScreen() {
   };
 
   const handleDone = () => {
-    navigation.popToTop();
+    navigation.reset({
+      index: 0,
+      routes: [{ name: "PaymentList", params: { refreshAt: Date.now() } }],
+    });
   };
 
   const handleRetry = () => {
@@ -239,7 +242,12 @@ export default function ReceiptScreen() {
 
             <View style={styles.receiptDivider} />
             <ReceiptRow label="Total" value={formatRupiah(detail.total)} bold />
-            <ReceiptRow label="Bayar" value={formatRupiah(detail.cash)} bold />
+            <ReceiptRow
+              label="Bayar"
+              value={`- ${formatRupiah(detail.cash)}`}
+              bold
+            />
+            <ReceiptRow label="Sisa" value={formatRupiah(detail.change)} bold />
 
             <View style={styles.receiptDivider} />
             <Text style={styles.receiptFooter}>{detail.textInfo}</Text>

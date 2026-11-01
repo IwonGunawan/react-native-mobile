@@ -13,6 +13,7 @@ import { useState } from "react";
 import { authService } from "../../services/auth.service";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { colors } from "../../theme";
+import { APP_VERSION } from "../../config/version";
 
 export default function LoginScreen() {
   const [email, setEmail] = useState("");
@@ -136,7 +137,7 @@ export default function LoginScreen() {
 
             {/* FOOTER */}
             <Text variant="bodySmall" style={styles.footer}>
-              Cikaret Setra v2.0 © 2026
+               Cikaret Setra v{APP_VERSION} © 2026
             </Text>
           </ScrollView>
         </KeyboardAvoidingView>
@@ -156,18 +157,18 @@ const styles = StyleSheet.create({
   scroll: {
     flexGrow: 1,
     justifyContent: "center",
-    padding: 24,
+    padding: 20,
   },
 
   // HEADER
   header: {
     alignItems: "center",
-    marginBottom: 32,
+    marginBottom: 28,
   },
   iconWrapper: {
-    width: 86,
-    height: 86,
-    borderRadius: 43,
+    width: 92,
+    height: 92,
+    borderRadius: 46,
     backgroundColor: "rgba(255,255,255,0.95)",
     justifyContent: "center",
     alignItems: "center",
@@ -195,8 +196,8 @@ const styles = StyleSheet.create({
   // CARD
   card: {
     backgroundColor: colors.card,
-    borderRadius: 16,
-    padding: 24,
+    borderRadius: 20,
+    padding: 28,
     elevation: 4,
     borderWidth: 1,
     borderColor: colors.border,
@@ -216,7 +217,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#eef9fc",
     borderRadius: 8,
     padding: 12,
-    marginBottom: 12,
+    marginBottom: 16,
   },
   errorText: {
     color: colors.danger,
@@ -225,18 +226,18 @@ const styles = StyleSheet.create({
 
   // INPUT
   input: {
-    marginBottom: 12,
+    marginBottom: 16,
     backgroundColor: colors.card,
   },
 
   // BUTTON
   button: {
-    marginTop: 8,
-    borderRadius: 8,
+    marginTop: 12,
+    borderRadius: 12,
     backgroundColor: colors.primary,
   },
   buttonContent: {
-    paddingVertical: 6,
+    paddingVertical: 10,
   },
   buttonLabel: {
     fontSize: 15,
@@ -247,6 +248,6 @@ const styles = StyleSheet.create({
   footer: {
     textAlign: "center",
     color: "rgba(255,255,255,0.72)",
-    marginTop: 32,
+    marginTop: 24,
   },
 });

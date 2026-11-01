@@ -1,5 +1,6 @@
 import { useTheme } from "react-native-paper";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { CommonActions } from "@react-navigation/native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import ProfileScreen from "../screens/profile/ProfileScreen";
@@ -85,6 +86,20 @@ export default function AppNavigator() {
         name="Payment"
         component={PaymentStack}
         options={{ tabBarLabel: "Bayar Air" }}
+        listeners={({ navigation }) => ({
+          tabPress: (e) => {
+            e.preventDefault();
+            navigation.dispatch(
+              CommonActions.navigate({
+                name: "Payment",
+                params: {
+                  screen: "PaymentList",
+                  params: { refreshAt: Date.now() },
+                },
+              }),
+            );
+          },
+        })}
       />
       <Tab.Screen
         name="Profile"

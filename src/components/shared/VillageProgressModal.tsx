@@ -1,4 +1,4 @@
-import { Modal, ScrollView, StyleSheet, View } from "react-native";
+import { Modal, ScrollView, StyleSheet, TouchableOpacity, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { VillageStat } from "../../hooks/useHomeData";
 import { colors } from "../../theme";
@@ -10,12 +10,14 @@ interface Props {
   visible: boolean;
   stats: VillageStat[];
   onClose: () => void;
+  onVillagePress?: (villageId: number) => void;
 }
 
 export default function VillageProgressModal({
   visible,
   stats,
   onClose,
+  onVillagePress,
 }: Props) {
   const { user } = useAuthStore();
   const insets = useSafeAreaInsets();
@@ -44,7 +46,17 @@ export default function VillageProgressModal({
 
           <ScrollView showsVerticalScrollIndicator={false}>
             {stats.map((s) => (
-              <View key={s.villageId} style={styles.villageItem}>
+              <TouchableOpacity
+                key={s.villageId}
+                style={styles.villageItem}
+                activeOpacity={onVillagePress ? 0.7 : 1}
+                disabled={!onVillagePress}
+                onPress={
+                  onVillagePress
+                    ? () => onVillagePress(s.villageId)
+                    : undefined
+                }
+              >
                 {/* header */}
                 <View style={styles.villageHeader}>
                   <View style={styles.villageLeft}>
@@ -67,13 +79,13 @@ export default function VillageProgressModal({
                   progress={
                     s.totalCustomers > 0 ? s.checkedCount / s.totalCustomers : 0
                   }
-                  color={
-                    s.percent === 100
-                      ? colors.success
-                      : s.percent >= 50
-                        ? colors.primary
-                        : colors.warning
-                  }
+                   color={
+                     s.percent === 100
+                       ? "#2e7d32"
+                       : s.percent >= 51
+                         ? "#f9a825"
+                         : colors.danger
+                   }
                   style={styles.progressBar}
                 />
 
@@ -93,7 +105,7 @@ export default function VillageProgressModal({
                     </View>
                   )}
                 </View>
-              </View>
+              </TouchableOpacity>
             ))}
           </ScrollView>
 

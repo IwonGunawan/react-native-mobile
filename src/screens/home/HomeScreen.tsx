@@ -1,4 +1,5 @@
 import {
+  Alert,
   FlatList,
   RefreshControl,
   StyleSheet,
@@ -16,8 +17,9 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { colors } from "../../theme";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import VillageProgressModal from "../../components/shared/VillageProgressModal";
-import { TopArrear } from "../../services/report.service";
+import { ListPayment } from "../../services/payment.service";
 import { formatRupiah } from "../../utils";
+import * as Clipboard from "expo-clipboard";
 
 type Nav = NativeStackNavigationProp<HomeStackParams, "HomeMain">;
 
@@ -53,7 +55,7 @@ export default function HomeScreen() {
           ? "weather-sunset-up"
           : "weather-night";
 
-  const allArrears = (data?.topArrears ?? []) as TopArrear[];
+  const allArrears = (data?.topArrears ?? []) as ListPayment[];
   const visibleArrears = showAllArrears ? allArrears : allArrears.slice(0, 5);
   const arrearsHasMore = allArrears.length > 5;
 
@@ -131,6 +133,72 @@ export default function HomeScreen() {
               </View>
             )}
 
+            {/* ── Rekening Pembayaran ── */}
+            <Card style={styles.accountCard}>
+              <Card.Content>
+                <View style={styles.accountHeader}>
+                  <MaterialCommunityIcons
+                    name="bank"
+                    size={30}
+                    color={colors.primary}
+                  />
+                  <Text variant="titleMedium" style={styles.accountTitle}>
+                    Informasi Rekening Pembayaran
+                  </Text>
+                </View>
+                <View style={styles.accountRow}>
+                  <Text variant="bodyLarge" style={styles.accountLabel}>
+                    No. Rekening
+                  </Text>
+                  <View style={styles.accountValueRow}>
+                    <Text variant="titleMedium" style={styles.accountValue}>
+                      {data?.bankInfo?.accountNumber ?? "-"}
+                    </Text>
+                    {data?.bankInfo?.accountNumber ? (
+                      <TouchableOpacity
+                        style={styles.copyBtn}
+                        onPress={async () => {
+                          await Clipboard.setStringAsync(
+                            data?.bankInfo?.accountNumber || "",
+                          );
+                          Alert.alert(
+                            "Berhasil",
+                            "Nomor rekening berhasil disalin",
+                          );
+                        }}
+                        activeOpacity={0.7}
+                      >
+                        <MaterialCommunityIcons
+                          name="content-copy"
+                          size={18}
+                          color={colors.primary}
+                        />
+                        <Text style={styles.copyText}>Salin</Text>
+                      </TouchableOpacity>
+                    ) : null}
+                  </View>
+                </View>
+                <Divider style={styles.accountDivider} />
+                <View style={styles.accountRow}>
+                  <Text variant="bodyLarge" style={styles.accountLabel}>
+                    Nama Bank
+                  </Text>
+                  <Text variant="titleMedium" style={styles.accountValue}>
+                    {data?.bankInfo?.bankName ?? "-"}
+                  </Text>
+                </View>
+                <Divider style={styles.accountDivider} />
+                <View style={styles.accountRow}>
+                  <Text variant="bodyLarge" style={styles.accountLabel}>
+                    Atas Nama
+                  </Text>
+                  <Text variant="titleMedium" style={styles.accountValue}>
+                    {data?.bankInfo?.accountName ?? "-"}
+                  </Text>
+                </View>
+              </Card.Content>
+            </Card>
+
             {/* ── Total Pemakaian Air ── */}
             <Card style={styles.m3Card}>
               <Card.Content style={styles.m3Content}>
@@ -167,13 +235,7 @@ export default function HomeScreen() {
                   <View style={styles.progressHeader}>
                     <View>
                       <Text variant="titleSmall" style={styles.progressTitle}>
-                        Progress Cek Air Bulan Ini
-                      </Text>
-                      <Text variant="bodySmall" style={styles.progressSub}>
-                        {isLoading
-                          ? "Memuat..."
-                          : `total customer yang sudah dicek meter air`}
-                        {/* : `${(data?.totalCustomers ?? 0) - (data?.totalChecked ?? 0)} customer belum dicek`} */}
+                        Kilometer yang sudah dicek
                       </Text>
                     </View>
                     <View style={styles.percentBadge}>
@@ -187,8 +249,10 @@ export default function HomeScreen() {
                     progress={isLoading ? 0 : (data?.checkPercent ?? 0) / 100}
                     color={
                       (data?.checkPercent ?? 0) === 100
-                        ? colors.success
-                        : colors.primary
+                        ? "#2e7d32"
+                        : (data?.checkPercent ?? 0) >= 51
+                          ? "#f9a825"
+                          : colors.danger
                     }
                     style={styles.progressBar}
                   />
@@ -207,10 +271,10 @@ export default function HomeScreen() {
               </Card>
             </TouchableOpacity>
 
-            {/* ── Top Tunggakan ── */}
+            {/* ── Tunggakan Terbesar ── */}
             <View style={styles.sectionRow}>
               <Text variant="titleSmall" style={styles.sectionTitle}>
-                Top Tunggakan
+                Tunggakan Terbesar
               </Text>
             </View>
 
@@ -236,15 +300,29 @@ export default function HomeScreen() {
                           <Text style={styles.arrearRankText}>{index + 1}</Text>
                         </View>
                         <View style={styles.arrearInfo}>
-                          <Text variant="bodyMedium" style={styles.arrearName}>
-                            {item.name}
-                          </Text>
+                          <TouchableOpacity
+                            onPress={() => {
+                              const parent = navigation.getParent() as any;
+                              parent?.navigate("Payment", {
+                                screen: "Bill",
+                                params: { customer: item },
+                              });
+                            }}
+                            activeOpacity={0.7}
+                          >
+                            <Text
+                              variant="bodyMedium"
+                              style={styles.arrearName}
+                            >
+                              {item.name}
+                            </Text>
+                          </TouchableOpacity>
                           <Text variant="bodySmall" style={styles.arrearCode}>
                             {item.code}
                           </Text>
                         </View>
                         <Text variant="bodyMedium" style={styles.arrearAmount}>
-                          {formatRupiah(item.arrearsAmount)}
+                          {formatRupiah(item.finalTotal)}
                         </Text>
                       </View>
                       {(index < visibleArrears.length - 1 ||
@@ -365,6 +443,14 @@ export default function HomeScreen() {
         visible={modalVisible}
         stats={data?.villageStats ?? []}
         onClose={() => setModalVisible(false)}
+        onVillagePress={(villageId) => {
+          setModalVisible(false);
+          const parent = navigation.getParent() as any;
+          parent?.navigate("WaterUsage", {
+            screen: "WaterUsageList",
+            params: { villageId, isUnchecked: true },
+          });
+        }}
       />
     </SafeAreaView>
   );
@@ -384,17 +470,56 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   greetingAvatar: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     backgroundColor: colors.primaryLight + "20",
     justifyContent: "center",
     alignItems: "center",
     flexShrink: 0,
   },
   greetingTexts: { flex: 1, minWidth: 0 },
-  greetText: { color: colors.textSecondary, fontWeight: "500" },
-  nameText: { color: colors.textPrimary, fontWeight: "700" },
+  greetText: { color: colors.textSecondary, fontWeight: "500", fontSize: 15 },
+  nameText: { color: colors.textPrimary, fontWeight: "700", fontSize: 22 },
+
+  // Rekening
+  accountCard: {
+    marginHorizontal: 16,
+    marginBottom: 12,
+    borderRadius: 12,
+    elevation: 2,
+  },
+  accountHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginBottom: 12,
+  },
+  accountTitle: { fontWeight: "700", color: colors.textPrimary, fontSize: 18 },
+  accountRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 8,
+  },
+  accountLabel: {
+    color: colors.textSecondary,
+    fontSize: 16,
+    fontWeight: "500",
+  },
+  accountValueRow: { flexDirection: "row", alignItems: "center", gap: 10 },
+  accountValue: { color: colors.textPrimary, fontWeight: "700", fontSize: 18 },
+  copyBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: colors.primaryLight + "15",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  copyText: { color: colors.primary, fontWeight: "600", fontSize: 15 },
+  accountDivider: { marginVertical: 4 },
 
   // Payment stats
   statsRow: {
@@ -475,7 +600,7 @@ const styles = StyleSheet.create({
   seeMore: { flexDirection: "row", alignItems: "center", gap: 4 },
   seeMoreText: { color: colors.primary, fontSize: 13, fontWeight: "600" },
 
-  // Top Tunggakan
+  // Tunggakan Terbesar
   arrearsCard: {
     marginHorizontal: 16,
     marginBottom: 8,

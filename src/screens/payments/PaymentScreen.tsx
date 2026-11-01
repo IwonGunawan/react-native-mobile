@@ -5,10 +5,10 @@ import {
   RefreshControl,
   TouchableOpacity,
 } from "react-native";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Text, Searchbar, Chip, Card } from "react-native-paper";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useIsFocused, useNavigation } from "@react-navigation/native";
+import { useIsFocused, useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { villageService } from "../../services/village.service";
@@ -25,6 +25,7 @@ type Nav = NativeStackNavigationProp<PaymentStackParams, "PaymentList">;
 export default function PaymentsScreen() {
   const { user } = useAuthStore();
   const navigation = useNavigation<Nav>();
+  const route = useRoute<RouteProp<PaymentStackParams, "PaymentList">>();
   const isFocused = useIsFocused();
 
   const [villages, setVillages] = useState<{ id: number; name: string }[]>([]);
@@ -47,6 +48,13 @@ export default function PaymentsScreen() {
     refresh,
   } = usePaymentList();
 
+  const lastRefreshRef = useRef(0);
+  const doRefresh = useCallback(() => {
+    const now = Date.now();
+    if (now - lastRefreshRef.current < 1000) return;
+    lastRefreshRef.current = now;
+    refresh();
+  }, [refresh]);
   // Fetch villages untuk filter
   useEffect(() => {
     villageService
@@ -84,9 +92,15 @@ export default function PaymentsScreen() {
   // Refetch
   useEffect(() => {
     if (isFocused) {
-      refresh();
+      doRefresh();
     }
-  }, [isFocused]);
+  }, [isFocused, doRefresh]);
+
+  useEffect(() => {
+    if (route.params?.refreshAt) {
+      doRefresh();
+    }
+  }, [route.params?.refreshAt, doRefresh]);
 
   const renderItem = ({ item }: { item: ListPayment }) => {
     return (

@@ -8,6 +8,7 @@ export interface WaterUsageList {
   villageId:  number;
   prefix:     string;
   isChecked:  number; // 1 = sudah, 0 = belum
+  lastMeter:  number | null; // meter terakhir sebelum bulan berjalan
 }
 
 export interface WaterUsageHistory {
@@ -28,6 +29,7 @@ export interface WaterUsageQuery {
   limit?: number;
   sortBy?: 'name' | 'id';
   sortOrder?: 'ASC' | 'DESC';
+  isUnchecked?: boolean;
 }
 
 export interface VillageProgress {

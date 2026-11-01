@@ -23,6 +23,7 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { authService } from "../../services/auth.service";
 import { colors } from "../../theme";
 import { useAuthStore } from "../../stores/auth.store";
+import { APP_VERSION } from "../../config/version";
 
 export default function ProfileScreen() {
   const { user, logout } = useAuthStore();
@@ -287,7 +288,7 @@ export default function ProfileScreen() {
                   label="Android"
                   value={Device.osVersion ?? "-"}
                 />
-                <InfoRow icon="application" label="Versi App" value="2.0.0" />
+                <InfoRow icon="application" label="Versi App" value={APP_VERSION} />
               </Card.Content>
             </Card>
 
