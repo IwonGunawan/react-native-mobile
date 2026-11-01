@@ -271,10 +271,10 @@ export default function HomeScreen() {
               </Card>
             </TouchableOpacity>
 
-            {/* ── Top Tunggakan ── */}
+            {/* ── Tunggakan Terbesar ── */}
             <View style={styles.sectionRow}>
               <Text variant="titleSmall" style={styles.sectionTitle}>
-                Top Tunggakan
+                Tunggakan Terbesar
               </Text>
             </View>
 
@@ -310,7 +310,10 @@ export default function HomeScreen() {
                             }}
                             activeOpacity={0.7}
                           >
-                            <Text variant="bodyMedium" style={styles.arrearName}>
+                            <Text
+                              variant="bodyMedium"
+                              style={styles.arrearName}
+                            >
                               {item.name}
                             </Text>
                           </TouchableOpacity>
@@ -436,19 +439,19 @@ export default function HomeScreen() {
         contentContainerStyle={styles.list}
       />
 
-       <VillageProgressModal
-         visible={modalVisible}
-         stats={data?.villageStats ?? []}
-         onClose={() => setModalVisible(false)}
-         onVillagePress={(villageId) => {
-           setModalVisible(false);
-           const parent = navigation.getParent() as any;
-           parent?.navigate("WaterUsage", {
-             screen: "WaterUsageList",
-             params: { villageId, isUnchecked: true },
-           });
-         }}
-       />
+      <VillageProgressModal
+        visible={modalVisible}
+        stats={data?.villageStats ?? []}
+        onClose={() => setModalVisible(false)}
+        onVillagePress={(villageId) => {
+          setModalVisible(false);
+          const parent = navigation.getParent() as any;
+          parent?.navigate("WaterUsage", {
+            screen: "WaterUsageList",
+            params: { villageId, isUnchecked: true },
+          });
+        }}
+      />
     </SafeAreaView>
   );
 }
@@ -597,7 +600,7 @@ const styles = StyleSheet.create({
   seeMore: { flexDirection: "row", alignItems: "center", gap: 4 },
   seeMoreText: { color: colors.primary, fontSize: 13, fontWeight: "600" },
 
-  // Top Tunggakan
+  // Tunggakan Terbesar
   arrearsCard: {
     marginHorizontal: 16,
     marginBottom: 8,
