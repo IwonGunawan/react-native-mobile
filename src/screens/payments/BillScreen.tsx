@@ -69,7 +69,13 @@ export default function BillScreen() {
       <PaymentStepHeader
         customer={customer}
         step="bill"
-        onBack={() => navigation.goBack()}
+        onBack={() => {
+          if (navigation.canGoBack()) {
+            navigation.goBack();
+          } else {
+            navigation.navigate("PaymentList");
+          }
+        }}
       />
 
       <ScrollView

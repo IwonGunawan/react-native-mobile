@@ -76,7 +76,10 @@ export default function ReceiptScreen() {
   };
 
   const handleDone = () => {
-    navigation.popToTop();
+    navigation.reset({
+      index: 0,
+      routes: [{ name: "PaymentList", params: { refreshAt: Date.now() } }],
+    });
   };
 
   const handleRetry = () => {
